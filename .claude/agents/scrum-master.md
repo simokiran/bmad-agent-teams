@@ -62,7 +62,7 @@ These are HIGH-LEVEL criteria. Story-level ACs will be more granular.
 ## Track Distribution Guidance
 Provide guidance for story writers on how to split work across tracks. **Reference `docs/naming-registry.md`** for all entity names.
 
-- **Database stories (ALWAYS START HERE)**:
+- **Database stories (ALWAYS START HERE - NO DEPENDENCIES)**:
   - Schema creation (tables, columns - check naming registry)
   - Indexes and constraints
   - Migrations and seed data
@@ -76,11 +76,18 @@ Provide guidance for story writers on how to split work across tracks. **Referen
   - Example: "Implement POST /api/auth/register endpoint with RegisterRequest type"
 
 - **Frontend stories (AFTER BACKEND)**:
-  - Pages and routes (check naming registry for route names)
-  - Components (check naming registry for component names)
+  - Web pages and routes (check naming registry for route names)
+  - Web components (check naming registry for component names)
   - Forms and validation (check naming registry for form field names)
   - State management
   - Example: "Create RegisterForm component with email/password/name fields"
+
+- **Mobile stories (AFTER BACKEND - PARALLEL WITH FRONTEND)**:
+  - Mobile screens (check naming registry Section 7 for screen names)
+  - Mobile components (check naming registry for mobile components)
+  - Navigation (check naming registry for mobile routes)
+  - Platform-specific features (camera, push notifications, etc.)
+  - Example: "Create RegisterScreen (React Native) with email/password TextInputs"
 
 ### Naming Registry Reference
 **CRITICAL**: All story writers MUST check `docs/naming-registry.md` before creating stories to:
@@ -128,6 +135,7 @@ When the parallel story writer agent creates stories for this epic:
 | Database | EPIC-001, EPIC-002 | ~[N] |
 | Backend | EPIC-001, EPIC-002 | ~[N] |
 | Frontend | EPIC-001, EPIC-002 | ~[N] |
+| Mobile | EPIC-001, EPIC-002 | ~[N] |
 
 ### Dependency Order
 ```

@@ -7,11 +7,11 @@
 
 ## What is This?
 
-**BMad Agent Teams** is a Claude Code extension that implements the **BMad Method** (Breakthrough Method for Agile AI-Driven Development). It transforms your Claude Code session into a complete software development team with 12 specialized AI agents working together through structured phases.
+**BMad Agent Teams** is a Claude Code extension that implements the **BMad Method** (Breakthrough Method for Agile AI-Driven Development). It transforms your Claude Code session into a complete software development team with 13 specialized AI agents working together through structured phases.
 
 ### Key Features
 
-- **12 Specialized Agents**: Business Analyst, Product Manager, UX Designer, System Architect, Scrum Master, Frontend/Backend/Database Developers, QA Engineer, DevOps Engineer, Tech Lead, and an Orchestrator to manage them all
+- **13 Specialized Agents**: Business Analyst, Product Manager, UX Designer, System Architect, Scrum Master, Frontend/Backend/Database/Mobile Developers, QA Engineer, DevOps Engineer, Tech Lead, and an Orchestrator to manage them all
 - **8-Phase Structured Workflow**: Discovery → Planning → Architecture → Sprint Planning → Implementation → QA → Deployment → Final Review
 - **Parallel Execution**: Agents work in parallel where possible (PM + UX, Story Writers, Implementation Team)
 - **Epic-Story Hierarchy**: PRD features break down into Epics, which break down into Stories with clear acceptance criteria
@@ -113,7 +113,7 @@ The Orchestrator:
 - ✅ Tracks progress through all phases
 - ✅ Never writes code (only manages agents)
 
-### The 12-Agent Team
+### The 13-Agent Team
 
 | Agent | Role | Model | Phase |
 |-------|------|-------|-------|
@@ -124,9 +124,10 @@ The Orchestrator:
 | **System Architect** | Technical design, ADRs | Opus | Phase 3 |
 | **Scrum Master** | Epic creation, sprint planning | Sonnet | Phase 4 |
 | **Story Writers** | Convert epics to stories (1 per epic) | Sonnet | Phase 4b |
-| **Frontend Developer** | UI implementation, components | Sonnet | Phase 5 |
+| **Frontend Developer** | Web UI implementation, components | Sonnet | Phase 5 |
 | **Backend Developer** | API, business logic | Sonnet | Phase 5 |
 | **Database Engineer** | Schema, migrations, queries | Sonnet | Phase 5 |
+| **Mobile Developer** | Mobile app screens, navigation | Sonnet | Phase 5 |
 | **QA Engineer** | Test plans, validation | Sonnet | Phase 6 |
 | **DevOps Engineer** | Deployment configs, CI/CD | Sonnet | Phase 7 |
 | **Tech Lead** | Final review, ship decision | Opus | Phase 8 |
@@ -263,31 +264,31 @@ Blocks: STORY-003 (Backend needs this table)
 
 ---
 
-#### Phase 5: Implementation (Agent Team - 3 Developers in Parallel!)
-**Orchestrator spawns**: Agent Team (Database + Backend + Frontend)
-**Parallel**: ✅ Yes - All 3 developers work simultaneously
+#### Phase 5: Implementation (Agent Team - 4 Developers in Parallel!)
+**Orchestrator spawns**: Agent Team (Database + Backend + Frontend + Mobile)
+**Parallel**: ✅ Yes - All 4 developers work simultaneously
 
 This is the **most complex phase** with true parallel coordination:
 
 ```
-Database Engineer          Backend Developer         Frontend Developer
-     ↓                           ↓                          ↓
-Claims Database stories    Waits for Database      Waits for Backend
-Checks naming registry     Checks naming registry  Checks naming registry
-     ↓                           ↓                          ↓
-Implements STORY-001       Starts STORY-003        Starts STORY-006
-  - Creates users table      - Register endpoint       - RegisterForm
-  - Commits each task        - Uses users.email        - Calls /api/auth/register
-  - Updates naming registry  - Maps to camelCase       - Form: name="email"
-  - Records SHAs in story    - Updates registry        - Updates registry
-  - Pushes                   - Pushes                  - Pushes
-     ↓                           ↓                          ↓
-Implements STORY-002       Implements STORY-004    Implements STORY-007
-  - Creates sessions table   - Login endpoint          - LoginPage
-     ↓                           ↓                          ↓
-     ... continues ...           ... continues ...         ... continues ...
+Database Engineer     Backend Developer      Frontend Developer    Mobile Developer
+     ↓                      ↓                       ↓                     ↓
+Claims DB stories     Waits for DB          Waits for Backend    Waits for Backend
+Checks naming reg.    Checks naming reg.    Checks naming reg.   Checks naming reg.
+     ↓                      ↓                       ↓                     ↓
+Implements STORY-001  Starts STORY-003      Starts STORY-006     Starts STORY-009
+- Users table         - Register API        - RegisterForm (web) - RegisterScreen (mobile)
+- Commits each task   - Uses users.email    - Calls API          - Calls same API
+- Updates registry    - Maps to camelCase   - Form: name="email" - TextInput: email
+- Records SHAs        - Updates registry    - Updates registry   - Updates registry
+- Pushes              - Pushes              - Pushes             - Pushes
+     ↓                      ↓                       ↓                     ↓
+Implements STORY-002  Implements STORY-004  Implements STORY-007 Implements STORY-010
+- Sessions table      - Login endpoint      - LoginPage (web)    - LoginScreen (mobile)
+     ↓                      ↓                       ↓                     ↓
+  ... continues ...      ... continues ...      ... continues ...     ... continues ...
 
-ALL THREE WORKING IN PARALLEL! →
+ALL FOUR WORKING IN PARALLEL! →
 ```
 
 **How They Coordinate**:
@@ -296,11 +297,13 @@ ALL THREE WORKING IN PARALLEL! →
 3. Database stories have no dependencies (run first)
 4. Backend stories depend on Database
 5. Frontend stories depend on Backend
-6. Each task = 1 git commit with SHA recorded in story file
-7. Each completed story = 1 git push
+6. Mobile stories depend on Backend (parallel with Frontend)
+7. Each task = 1 git commit with SHA recorded in story file
+8. Each completed story = 1 git push
 
 **Output**:
-- `src/` - All implementation code
+- `src/` - All web implementation code
+- `mobile/` - All mobile app code
 - `tests/` - All test files
 - Updated `docs/naming-registry.md`
 - All story files with git commit SHAs
@@ -310,32 +313,36 @@ ALL THREE WORKING IN PARALLEL! →
 Time 0:00
 ├─ Database Engineer starts STORY-001 (users table)
 ├─ Backend Developer waits (blocked)
-└─ Frontend Developer waits (blocked)
+├─ Frontend Developer waits (blocked)
+└─ Mobile Developer waits (blocked)
 
 Time 0:15
 ├─ Database Engineer completes STORY-001 ✅
 │   → Updates naming-registry.md with users.email
 ├─ Backend Developer starts STORY-003 (register endpoint)
 │   → Reads naming-registry.md: users.email → API email
-└─ Frontend Developer still waits
+├─ Frontend Developer still waits
+└─ Mobile Developer still waits
 
 Time 0:30
 ├─ Database Engineer starts STORY-002 (sessions table)
 ├─ Backend Developer completes STORY-003 ✅
 │   → Updates naming-registry.md with POST /api/auth/register
-└─ Frontend Developer starts STORY-006 (RegisterForm)
-    → Reads naming-registry.md for API contract
+├─ Frontend Developer starts STORY-006 (RegisterForm web)
+│   → Reads naming-registry.md for API contract
+└─ Mobile Developer starts STORY-009 (RegisterScreen mobile)
+    → Reads naming-registry.md for same API contract
 
 Time 0:45
-ALL THREE WORKING IN PARALLEL NOW! ⚡
+ALL FOUR WORKING IN PARALLEL NOW! ⚡
 ```
 
 **Naming Consistency Example**:
 ```
-Database Column → API Field → TypeScript Type → Form Input
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-users.email     → email      → email: string   → <input name="email" />
-users.created_at → createdAt → createdAt: string → "Joined: Feb 19"
+DB Column → API Field → TS Type → Web Form → Mobile Input
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+users.email     → email      → email: string   → <input name="email" /> → <TextInput keyboardType="email-address" />
+users.created_at → createdAt → createdAt: string → "Joined: Feb 19" → Text("Joined: Feb 19")
 ```
 
 ---
@@ -404,7 +411,7 @@ Tech Lead:
 | 3: Architecture | System Architect | Subagent | ❌ No | Needs full context |
 | 4: Epic Creation | Scrum Master | Subagent | ❌ No | Holistic view needed |
 | 4b: Story Writing | N Story Writers | Subagent | ✅ Yes (N) | Story number ranges |
-| 5: Implementation | DB + Backend + Frontend | **Agent Team** | ✅ Yes (3) | Naming registry + Dependencies |
+| 5: Implementation | DB + Backend + Frontend + Mobile | **Agent Team** | ✅ Yes (4) | Naming registry + Dependencies |
 | 6: QA | QA Engineer | Subagent | ❌ No | Tests everything |
 | 7: Deployment | DevOps Engineer | Subagent | ❌ No | Single config |
 | 8: Final Review | Tech Lead | Subagent | ❌ No | Holistic audit |
@@ -434,7 +441,7 @@ await Promise.all([
 **Used in**: Phase 5 only (Implementation)
 
 Multiple agents coordinate on shared work:
-- 3 agents work in same session (Database + Backend + Frontend)
+- 4 agents work in same session (Database + Backend + Frontend + Mobile)
 - Share access to story files and naming registry
 - Coordinate via dependencies and naming consistency
 - All work on same codebase simultaneously
@@ -443,13 +450,18 @@ Multiple agents coordinate on shared work:
 ```javascript
 // Orchestrator spawns agent team
 spawnAgentTeam({
-  agents: ['database-engineer', 'backend-developer', 'frontend-developer'],
+  agents: [
+    'database-engineer',
+    'backend-developer',
+    'frontend-developer',
+    'mobile-developer'
+  ],
   sharedContext: {
     stories: 'docs/stories/*.md',
     namingRegistry: 'docs/naming-registry.md'
   }
 });
-// All 3 claim stories, implement in parallel, coordinate via registry
+// All 4 claim stories, implement in parallel, coordinate via registry
 ```
 
 ### Document-Driven Relay

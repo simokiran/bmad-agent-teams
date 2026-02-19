@@ -4,7 +4,7 @@
 
 ## Metadata
 - **Points**: [1 | 2 | 3 | 5 | 8]
-- **Track**: [Frontend | Backend | Database | Full-Stack]
+- **Track**: [Frontend | Backend | Database | Mobile | Full-Stack]
 - **Priority**: [P0 | P1 | P2]
 - **Sprint**: 1
 - **Epic**: [EPIC-NNN]
@@ -53,6 +53,11 @@ Individual committable units of work. Each task = one git commit.
 - Components: `[ComponentName]` (PascalCase - see Section 5 of naming registry)
 - Form fields: `[fieldName]` (camelCase - see Section 6 of naming registry)
 
+#### Mobile Names (if applicable)
+- Screens: `[ScreenName]` (PascalCase + "Screen" - see Section 7 of naming registry)
+- Components: `[ComponentName]` (PascalCase - see Section 7 of naming registry)
+- Navigation: `/[route]` (lowercase - see Section 7 of naming registry)
+
 ### Files to Create
 - `src/[path]/[filename]` — [Purpose]
 
@@ -66,6 +71,7 @@ DB:       users.email (VARCHAR)
 API:      POST /api/auth/register { email: string }
 Type:     RegisterRequest { email: string }
 Frontend: <input name="email" />
+Mobile:   <TextInput keyboardType="email-address" />
 ```
 
 ### Key Architecture Decisions

@@ -163,7 +163,53 @@
 
 ---
 
-## 7. State Management Registry
+## 7. Mobile Registry (Apps)
+
+### Mobile Screens
+
+| Screen Name | Platform | Purpose | Navigation Route | File Location | Created By | Story |
+|-------------|----------|---------|------------------|---------------|------------|-------|
+| `RegisterScreen` | React Native | User registration | `/register` | `mobile/src/screens/auth/RegisterScreen.tsx` | Mobile Developer | STORY-020 |
+| `LoginScreen` | React Native | User login | `/login` | `mobile/src/screens/auth/LoginScreen.tsx` | Mobile Developer | STORY-021 |
+
+### Mobile Components
+
+| Component Name | Platform | Purpose | Props | File Location | Created By | Story |
+|----------------|----------|---------|-------|---------------|------------|-------|
+| `Button` | React Native | Reusable button | `ButtonProps` | `mobile/src/components/ui/Button.tsx` | Mobile Developer | STORY-025 |
+| `Input` | React Native | Form input | `InputProps` | `mobile/src/components/ui/Input.tsx` | Mobile Developer | STORY-026 |
+
+### Mobile Navigation
+
+| Route | Screen | Auth Required | Deep Link | Created By | Story |
+|-------|--------|---------------|-----------|------------|-------|
+| `/` | `HomeScreen` | No | `app://` | Mobile Developer | STORY-030 |
+| `/login` | `LoginScreen` | No | `app://login` | Mobile Developer | STORY-021 |
+| `/register` | `RegisterScreen` | No | `app://register` | Mobile Developer | STORY-020 |
+| `/dashboard` | `DashboardScreen` | Yes | `app://dashboard` | Mobile Developer | STORY-031 |
+
+### Mobile Naming Standards
+
+**React Native / Expo**:
+- Screens: `PascalCase` + "Screen" suffix (`RegisterScreen`)
+- Components: `PascalCase` (`Button`, `Card`)
+- Files: Match component name (`RegisterScreen.tsx`)
+
+**Flutter**:
+- Screens: `PascalCase` + "Screen" suffix (`RegisterScreen`)
+- Files: `snake_case` (`register_screen.dart`)
+
+**SwiftUI**:
+- Views: `PascalCase` + "Screen" suffix (`RegisterScreen`)
+- Files: Match struct name (`RegisterScreen.swift`)
+
+**Kotlin / Compose**:
+- Composables: `PascalCase` (`RegisterScreen`)
+- Files: `PascalCase` (`RegisterScreen.kt`)
+
+---
+
+## 8. State Management Registry
 
 ### Global State
 
@@ -180,7 +226,7 @@
 
 ---
 
-## 8. Environment Variables
+## 9. Environment Variables
 
 ### Environment Variable Registry
 
@@ -193,7 +239,7 @@
 
 ---
 
-## 9. Error Code Registry
+## 10. Error Code Registry
 
 ### Error Codes
 
@@ -206,7 +252,7 @@
 
 ---
 
-## 10. Cross-Reference Mapping
+## 11. Cross-Reference Mapping
 
 ### Example: User Registration Flow
 
@@ -225,6 +271,10 @@
 | | `RegisterForm` | Component | Registration form component |
 | | `email` | Input name | Form field name |
 | | `password` | Input name | Form field name |
+| **Mobile** | `RegisterScreen` | Screen | Registration screen |
+| | `RegisterScreen.tsx` | File | React Native screen component |
+| | `email` state | State variable | TextInput value |
+| | `keyboardType="email-address"` | TextInput prop | Email keyboard |
 | **State** | `auth.user` | State property | Stores logged-in user |
 
 ---
@@ -258,7 +308,16 @@
 - ✅ After creating route: Add to Section 4 (Route Registry)
 - ✅ After creating component: Add to Section 5 (Component Registry)
 - ✅ After creating form: Add fields to Section 6 (Form Field Registry)
-- ✅ Update Cross-Reference Mapping (Section 10)
+- ✅ Update Cross-Reference Mapping (Section 11)
+
+**Mobile Developer**:
+- ✅ Before creating any screen: Check Section 7 (Mobile Registry)
+- ✅ Before creating components: Check mobile component registry
+- ✅ Before calling APIs: Check Section 2 for endpoint contracts
+- ✅ After creating screen: Add to Section 7 (Mobile Screens)
+- ✅ After creating component: Add to Section 7 (Mobile Components)
+- ✅ After creating navigation: Add to Section 7 (Mobile Navigation)
+- ✅ Update Cross-Reference Mapping (Section 11)
 
 ---
 
