@@ -4,67 +4,116 @@ This document outlines the planned features and improvements for the BMad Agent 
 
 ## Current Status: v1.0.0 (Initial Release)
 
-**Release Date**: February 19, 2024
+**Release Date**: February 19, 2026
 **Status**: ✅ Complete and ready for use
 
 ### What's Included in v1.0.0
 
-- ✅ 12 specialized AI agents
+- ✅ 13 specialized AI agents (incl. Mobile Developer)
 - ✅ 8-phase structured workflow
 - ✅ 8 slash commands
 - ✅ Epic-Story hierarchy
-- ✅ Git task tracking
+- ✅ Git SHA tracking per task
 - ✅ Quality gates
-- ✅ Parallel agent execution
+- ✅ Parallel agent execution (4 developers work simultaneously)
+- ✅ **Naming Registry System** (unified DB/API/Types/Frontend/Mobile naming)
+- ✅ **Claude Code Skills Integration** (agents invoke /wordpress, /react, etc.)
 - ✅ npm package with CLI
 - ✅ Comprehensive documentation
+
+### What Makes Our Implementation Unique
+
+- **Naming Registry**: Single source of truth preventing naming conflicts across stack layers
+- **Skills-Aware Agents**: All developers can invoke Claude Code skills and customize output
+- **Mobile-First**: Dedicated Mobile Developer agent (React Native, Flutter, SwiftUI, Kotlin)
+- **Granular Git Tracking**: Every task = 1 commit with SHA recorded in story file
+- **Parallel Coordination**: 4 specialized developers work in parallel with naming registry preventing conflicts
 
 ---
 
 ## Short-Term Goals (v1.1.0 - v1.3.0)
 
-### v1.1.0 - Enhanced Integration (Q2 2024)
+### v1.1.0 - Original BMAD-METHOD Features (Q2 2026)
 
-**Focus**: Better integration with development tools
+**Focus**: Adopt best features from original BMAD-METHOD
 
-#### Features
-- [ ] **GitHub Integration**
-  - Automatic issue creation from stories
-  - PR creation and linking
-  - Status sync between BMad and GitHub Projects
-  - Commit linking to story files
+> See [ENHANCEMENT-ROADMAP.md](docs/ENHANCEMENT-ROADMAP.md) and [COMPARISON-WITH-ORIGINAL.md](docs/COMPARISON-WITH-ORIGINAL.md) for detailed analysis
 
-- [ ] **Slack Notifications**
-  - Phase completion alerts
-  - Quality gate status
-  - Deploy notifications
-  - Tech Lead verdict announcements
+#### Priority 1 Features (High Impact, Medium Effort)
 
-- [ ] **Custom Quality Gates**
-  - User-defined gate criteria
-  - Custom scoring rubrics
-  - Configurable pass/fail thresholds
+- [ ] **Interactive Help System** (`/bmad-help`)
+  - Contextual guidance at any phase
+  - "What do I do next?" support
+  - Follow-up questions enabled
+  - Workflow navigation assistance
+  - **Impact**: Users never stuck or confused
+  - **Effort**: Medium (new skill + context awareness)
 
-- [ ] **Agent Model Auto-Selection**
-  - Automatic model selection based on task complexity
-  - Cost optimization mode (prefer sonnet over opus when possible)
-  - Speed optimization mode (prefer haiku for simple tasks)
+- [ ] **Quick Flow Workflows** (Simple Projects)
+  - `/bmad-quick-spec` — Fast specification (PRD + Architecture combined)
+  - `/bmad-quick-dev` — Single agent handles all development tracks
+  - New agent: `quick-flow-solo-dev.md`
+  - Auto-detect project complexity (< 5 stories = quick flow suggested)
+  - **Impact**: 80% faster for MVPs and prototypes
+  - **Effort**: Medium (new workflow + agent)
 
-#### Improvements
-- [ ] Better error messages
+- [ ] **Tech Writer Agent**
+  - Creates user-facing documentation (README, user guides, API reference)
+  - Runs in Phase 2 (initial docs) and Phase 6 (post-QA refinement)
+  - Outputs: README.md, docs/api-reference.md, docs/user-guide.md
+  - **Impact**: Professional docs without developer overhead
+  - **Effort**: Low (new agent, similar to existing ones)
+
+- [ ] **Research Modules** (Phase 1 Enhancement)
+  - `/bmad-research-market` — Competitor analysis via WebSearch
+  - `/bmad-research-domain` — Domain terminology and standards
+  - `/bmad-research-technical` — Tech stack options and best practices
+  - Enhances Business Analyst agent
+  - **Impact**: Data-driven product brief instead of assumptions
+  - **Effort**: Medium (extend Business Analyst with research workflows)
+
+#### Developer Experience Improvements
+
+- [ ] Better error messages with recovery suggestions
 - [ ] Progress indicators for long-running agents
 - [ ] Interrupt/resume agent support
-- [ ] Template hot-reloading
+- [ ] Template hot-reloading during development
 
-**Target**: April 2024
+**Target**: April 2026
 
 ---
 
-### v1.2.0 - Multi-Sprint Support (Q3 2024)
+### v1.2.0 - Adaptive Workflows & Quality (Q3 2026)
 
-**Focus**: Long-term project management
+**Focus**: Workflow flexibility and quality gates
 
-#### Features
+#### Priority 2 Features (High Impact, High Effort)
+
+- [ ] **Adaptive Complexity Scaling**
+  - Auto-detect project size from product brief
+  - SIMPLE (< 5 features) → Quick Flow
+  - MEDIUM (5-15 features) → Standard Flow (current)
+  - COMPLEX (15+ features) → Enterprise Flow (+ research, formal reviews)
+  - **Impact**: Right-sized process for every project
+  - **Effort**: High (complexity detection algorithm + workflow switching)
+
+- [ ] **Course Correction** (`/bmad-correct-course`)
+  - Mid-project pivot support
+  - Impact analysis on existing stories/epics
+  - Options: update PRD, create new epic, deprecate stories
+  - Re-run affected phases (re-architect, re-sprint-plan)
+  - **Impact**: Support agile adaptation to changing requirements
+  - **Effort**: High (state analysis + re-planning logic)
+
+- [ ] **Code Review Workflow** (Per-Story)
+  - Tech Lead reviews each story after completion (not just final review)
+  - Reviews: commits, naming registry compliance, security, test coverage
+  - Feedback loop: ✅ Approved or ⚠️ Changes Requested
+  - **Impact**: Catch issues early, improve code quality
+  - **Effort**: Medium (extend Tech Lead agent with per-story review)
+
+#### Multi-Sprint Support
+
 - [ ] **Multiple Sprint Support**
   - Sprint backlog management
   - Sprint 1, 2, 3, ... tracking
@@ -82,55 +131,68 @@ This document outlines the planned features and improvements for the BMad Agent 
   - Burndown charts
   - ETA predictions
 
-- [ ] **Story Refinement**
-  - Story splitting recommendations
-  - Acceptance criteria validation
-  - Story completeness scoring
-
 #### Improvements
 - [ ] Better story assignment to developers
 - [ ] Automatic epic sizing
 - [ ] Sprint planning wizard
 
-**Target**: July 2024
+**Target**: July 2026
 
 ---
 
-### v1.3.0 - Enterprise Features (Q4 2024)
+### v1.3.0 - Documentation & Validation (Q4 2026)
 
-**Focus**: Enterprise team support
+**Focus**: Documentation quality and validation
 
-#### Features
+#### Priority 3 Features (Medium Impact, Low Effort)
+
+- [ ] **Document Validation Workflow** (`/bmad-validate-doc`)
+  - Validate PRD: all sections present, acceptance criteria clear, no ambiguous language
+  - Validate Architecture: tech stack complete, ADRs referenced, security/performance quantified
+  - Validate Stories: user story format, testable ACs, valid dependencies, atomic tasks
+  - **Impact**: Document quality gates prevent downstream issues
+  - **Effort**: Low (validation rules + checker skill)
+
+- [ ] **Mermaid Diagram Generation** (`/bmad-mermaid`)
+  - Generate system architecture (C4 model), database ERD, API flows
+  - Generate user flow diagrams, sprint workflow, git branching strategy
+  - Output: docs/diagrams/*.mmd files
+  - **Impact**: Visual diagrams improve comprehension
+  - **Effort**: Low (Mermaid syntax generation)
+
+- [ ] **Project Context Generation** (`/bmad-context`)
+  - Generate docs/PROJECT-CONTEXT.md summarizing project state
+  - Includes: tech stack, architecture decisions, naming conventions, sprint status
+  - Use case: onboarding, resuming after context loss, sharing with external AI
+  - **Impact**: One file explains entire project
+  - **Effort**: Low (aggregate existing docs)
+
+#### Enterprise Integration
+
+- [ ] **GitHub Integration**
+  - Automatic issue creation from stories
+  - PR creation and linking
+  - Status sync between BMad and GitHub Projects
+  - Commit linking to story files
+
 - [ ] **Jira Integration**
   - Bidirectional sync with Jira
   - Epic → Jira Epic mapping
   - Story → Jira Story mapping
   - Sprint board sync
 
-- [ ] **Multi-Team Support**
-  - Team-specific agents
-  - Cross-team dependencies
-  - Team dashboards
-  - Resource allocation
-
-- [ ] **Custom Agent Templates**
-  - Agent creation wizard
-  - Agent template library
-  - Community-shared agents
-  - Agent versioning
-
-- [ ] **Audit Logging**
-  - Full audit trail of agent decisions
-  - Phase transition logs
-  - Quality gate evaluations
-  - Git commit tracking
+- [ ] **Slack Notifications**
+  - Phase completion alerts
+  - Quality gate status
+  - Deploy notifications
+  - Tech Lead verdict announcements
 
 #### Improvements
-- [ ] Role-based access control
-- [ ] SSO integration
-- [ ] Custom workflow phases
+- [ ] Custom Quality Gates (user-defined criteria)
+- [ ] Agent Model Auto-Selection (cost/speed optimization)
+- [ ] Audit Logging (full agent decision trail)
 
-**Target**: October 2024
+**Target**: October 2026
 
 ---
 
