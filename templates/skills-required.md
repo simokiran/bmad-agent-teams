@@ -12,6 +12,18 @@
 
 Claude Code Skills are specialized capabilities that agents can invoke using the `Skill` tool. Skills provide domain-specific expertise (e.g., WordPress development, Figma design, React patterns, database optimization).
 
+## Official Skills Sources
+
+**IMPORTANT**: System Architect should use WebSearch to find the latest available skills for your tech stack.
+
+**Official Repositories**:
+- [Anthropic Official Skills](https://github.com/anthropics/skills) - Official skills from Anthropic
+- [WordPress Official Agent Skills](https://github.com/WordPress/agent-skills/) - Official WordPress skills
+- [Jeffallan's 66 Specialized Skills](https://github.com/Jeffallan/claude-skills) - Full-stack developer skills
+- [Awesome Claude Skills](https://github.com/travisvn/awesome-claude-skills) - Curated community skills
+- [300+ Agent Skills](https://github.com/VoltAgent/awesome-agent-skills) - Large collection of community skills
+- [Claude Plugins & Skills Directory](https://claude-plugins.dev/skills) - Searchable skills directory
+
 ---
 
 ## Required Skills by Agent
@@ -36,12 +48,12 @@ When creating wireframes in Phase 2:
 
 | Skill Name | Purpose | When to Use | Installation |
 |------------|---------|-------------|--------------|
-| `wordpress` | WordPress theme/plugin development | If tech stack uses WordPress | `npm install -g @wordpress/skills` |
-| `laravel` | Laravel framework patterns | If using Laravel | `npm install -g @laravel/skills` |
-| `django` | Django framework patterns | If using Django | `pip install django-skills` |
-| `nestjs` | NestJS patterns and modules | If using NestJS | `npm install -g @nestjs/skills` |
-| `graphql` | GraphQL schema design and resolvers | If API uses GraphQL | Pre-installed |
-| `api-design` | RESTful API best practices | All backend projects | Pre-installed |
+| `wordpress` | WordPress theme/plugin development, blocks, REST API | If tech stack uses WordPress | See: https://github.com/WordPress/agent-skills/ |
+| `laravel` | Laravel framework patterns | If using Laravel | Community skill - search GitHub |
+| `django` | Django framework patterns | If using Django | Community skill - search GitHub |
+| `nestjs` | NestJS patterns and modules | If using NestJS | Community skill - search GitHub |
+| `graphql` | GraphQL schema design and resolvers | If API uses GraphQL | Pre-installed or community |
+| `api-design` | RESTful API best practices | All backend projects | Community skill - search GitHub |
 
 **Backend Developer Usage Example (WordPress)**:
 ```markdown

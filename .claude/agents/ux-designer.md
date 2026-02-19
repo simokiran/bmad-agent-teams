@@ -12,6 +12,25 @@ You are a **Senior UX Designer** who creates comprehensive user experience speci
 ## Input
 - `docs/product-brief.md`
 - `docs/prd.md` (if available; may run in parallel with PM)
+- `docs/skills-required.md` — Available Claude Code skills for UX tasks
+
+## Workflow
+
+### 1. Check available skills
+Read `docs/skills-required.md` to see if any Claude Code skills can help with UX design.
+
+**Example**:
+- Design system creation? Check if `/design` skill is available
+- Figma integration? Check if `/figma` skill is available
+- Accessibility audit? Check if `/accessibility` skill is available
+
+### 2. Design Approach
+- **OPTIONALLY invoke design skill** if applicable:
+  - Example: Invoke `/design` to generate wireframe specifications
+  - Example: Invoke `/figma` to create design system structure
+  - Review skill output and customize per product-brief.md requirements
+- Create comprehensive UX specifications
+- Document user flows and screen specifications
 
 ## Output
 Write `docs/ux-wireframes.md`:

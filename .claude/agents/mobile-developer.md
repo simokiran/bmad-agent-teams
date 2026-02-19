@@ -47,13 +47,33 @@ Check the Tasks section and Git Task Tracking table.
 ### 2. Check dependencies
 Are prerequisite stories done? Check Backend API stories to ensure endpoints exist.
 
-### 3. Update story status to "In Progress"
+### 3. Check available skills
+Read `docs/skills-required.md` to see if any Claude Code skills can help with this story.
 
-### 4. For EACH task in the story:
+**Example**:
+- React Native project? Check if `/react-native` skill is available
+- Flutter project? Check if `/flutter` skill is available
+- SwiftUI project? Check if `/swiftui` skill is available
+- Jetpack Compose? Check if `/compose` skill is available
+
+### 4. Update story status to "In Progress"
+
+### 5. For EACH task in the story:
 
 ```bash
-# a) Implement the task (screen, component, navigation, etc.)
-# b) Stage and commit with story-prefixed message:
+# a) OPTIONALLY invoke skill if applicable:
+#    Example: If React Native project and task is "Create RegisterScreen"
+#    Invoke: /react-native with prompt "Create RegisterScreen with TextInputs for name, email, password and submit button"
+#    Review skill output and customize per naming-registry.md and ux-wireframes.md
+
+# b) Implement the task (screen, component, navigation, etc.)
+#    - Use skill output as starting point (if skill was invoked)
+#    - Customize to match naming registry conventions
+#    - Ensure screen/component names match naming-registry.md Section 7
+#    - Follow mobile UX specifications from ux-wireframes.md
+#    - Ensure API integration uses exact endpoints from naming-registry.md Section 2
+
+# c) Stage and commit with story-prefixed message:
 git add -A
 git commit -m "[STORY-NNN] task: <task description>"
 

@@ -97,15 +97,28 @@ Write `docs/test-plan.md` with results:
 ```
 
 ## Testing Process
+
+### 1. Check available skills
+Read `docs/skills-required.md` to see if any Claude Code skills can help with testing.
+
+**Example**:
+- Playwright project? Check if `/playwright` skill is available
+- Cypress project? Check if `/cypress` skill is available
+- Jest tests? Check if `/jest` or `/testing` skill is available
+
+### 2. Execute Testing Workflow
 1. **Read all acceptance criteria** from PRD and stories
 2. **Run existing tests** — `npm test` or equivalent
-3. **Write additional tests** for uncovered acceptance criteria
-4. **Manual verification** of each AC that can't be automated
-5. **Edge case exploration** — try to break things
-6. **Security smoke test** — check for common vulnerabilities
-7. **Accessibility audit** — keyboard nav, ARIA, contrast
-8. **Performance check** — against architecture targets
-9. **Document everything** in test plan
+3. **OPTIONALLY invoke testing skill** if applicable:
+   - Example: Invoke `/playwright` to generate E2E test plan
+   - Review skill output and customize per project structure
+4. **Write additional tests** for uncovered acceptance criteria
+5. **Manual verification** of each AC that can't be automated
+6. **Edge case exploration** — try to break things
+7. **Security smoke test** — check for common vulnerabilities
+8. **Accessibility audit** — keyboard nav, ARIA, contrast
+9. **Performance check** — against architecture targets
+10. **Document everything** in test plan
 
 ## Bug Severity Definitions
 - **Critical**: App crashes, data loss, security breach, auth bypass

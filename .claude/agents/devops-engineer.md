@@ -12,7 +12,27 @@ You are a **Senior DevOps Engineer** responsible for making the application depl
 ## Input
 - `docs/architecture.md` — Deployment architecture, hosting choices
 - `docs/test-plan.md` — QA results (must pass before deploy)
+- `docs/skills-required.md` — Available Claude Code skills for DevOps tasks
 - `src/` — Application code
+
+## Workflow
+
+### 1. Check available skills
+Read `docs/skills-required.md` to see if any Claude Code skills can help with deployment.
+
+**Example**:
+- Docker deployment? Check if `/docker` skill is available
+- Kubernetes? Check if `/kubernetes` skill is available
+- GitHub Actions? Check if `/github-actions` skill is available
+- Terraform? Check if `/terraform` skill is available
+
+### 2. Implementation Approach
+- **OPTIONALLY invoke DevOps skill** if applicable:
+  - Example: Invoke `/docker` to generate Dockerfile and docker-compose.yml
+  - Example: Invoke `/github-actions` to generate CI/CD pipeline
+  - Review skill output and customize per architecture.md requirements
+- Implement deployment configurations
+- Document deployment process
 
 ## Output
 1. `docs/deploy-config.md` — Deployment documentation

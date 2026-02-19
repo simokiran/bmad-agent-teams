@@ -50,9 +50,25 @@ Frontend:  <input name="email" /> (camelCase)
 
 ### How to Determine Required Skills:
 
-Based on your Technology Stack, identify required skills:
+**STEP 1: Use WebSearch to find official and community skills**
 
-**Technology → Skill Mapping**:
+Search for available Claude Code skills matching your tech stack:
+```
+WebSearch: "Claude Code skills [technology] 2026"
+WebSearch: "MCP skills [framework] official 2026"
+```
+
+**Official Skills Sources:**
+- https://github.com/anthropics/skills - Official Anthropic skills
+- https://github.com/Jeffallan/claude-skills - 66 specialized skills
+- https://github.com/travisvn/awesome-claude-skills - Curated community skills
+- https://github.com/VoltAgent/awesome-agent-skills - 300+ agent skills
+
+**STEP 2: Map Technology Stack to Skills**
+
+Based on your Technology Stack and search results, identify required skills:
+
+**Common Technology → Skill Mapping**:
 - WordPress → `wordpress` skill (Backend Developer)
 - React/Next.js → `react`, `nextjs` skills (Frontend Developer)
 - React Native → `react-native` skill (Mobile Developer)

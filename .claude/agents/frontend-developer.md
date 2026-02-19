@@ -49,13 +49,31 @@ Check the Tasks section and Git Task Tracking table.
 ### 2. Check dependencies
 Are prerequisite stories done? Check their status in `docs/stories/`.
 
-### 3. Update story status to "In Progress"
+### 3. Check available skills
+Read `docs/skills-required.md` to see if any Claude Code skills can help with this story.
 
-### 4. For EACH task in the story:
+**Example**:
+- React project? Check if `/react` or `/nextjs` skill is available
+- Tailwind CSS? Check if `/tailwind` skill is available
+- Accessibility requirements? Check if `/accessibility` skill is available
+
+### 4. Update story status to "In Progress"
+
+### 5. For EACH task in the story:
 
 ```bash
-# a) Implement the task
-# b) Stage and commit with story-prefixed message:
+# a) OPTIONALLY invoke skill if applicable:
+#    Example: If React project and task is "Create LoginForm component"
+#    Invoke: /react with prompt "Create LoginForm component with email/password fields and validation"
+#    Review skill output and customize per naming-registry.md and ux-wireframes.md
+
+# b) Implement the task (component, page, form, etc.)
+#    - Use skill output as starting point (if skill was invoked)
+#    - Customize to match naming registry conventions
+#    - Ensure component names and routes match naming-registry.md
+#    - Follow UX specifications from ux-wireframes.md
+
+# c) Stage and commit with story-prefixed message:
 git add -A
 git commit -m "[STORY-NNN] task: <task description>"
 
