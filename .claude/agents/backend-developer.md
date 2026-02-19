@@ -44,14 +44,30 @@ Check the Tasks section and Git Task Tracking table.
 ### 2. Check dependencies
 Is the database schema ready? Check DB-track story statuses.
 
-### 3. Update story status to "In Progress"
+### 3. Check available skills
+Read `docs/skills-required.md` to see if any Claude Code skills can help with this story.
 
-### 4. For EACH task in the story:
+**Example**:
+- WordPress project? Check if `/wordpress` skill is available
+- GraphQL API? Check if `/graphql` skill is available
+- Laravel? Check if `/laravel` skill is available
+
+### 4. Update story status to "In Progress"
+
+### 5. For EACH task in the story:
 
 ```bash
-# a) Implement the task (API route, middleware, business logic, etc.)
+# a) OPTIONALLY invoke skill if applicable:
+#    Example: If WordPress project and task is "Create custom post type"
+#    Invoke: /wordpress with prompt "Create custom post type 'project'"
+#    Review skill output and customize per naming-registry.md
 
-# b) Commit with story-prefixed message:
+# b) Implement the task (API route, middleware, business logic, etc.)
+#    - Use skill output as starting point (if skill was invoked)
+#    - Customize to match naming registry conventions
+#    - Ensure API field names match database column names (camelCase vs snake_case)
+
+# c) Commit with story-prefixed message:
 git add -A
 git commit -m "[STORY-NNN] task: <task description>"
 
