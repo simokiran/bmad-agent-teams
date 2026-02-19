@@ -1,0 +1,109 @@
+---
+title: BMad Method — 12-Agent Workflow Architecture
+---
+graph TB
+    subgraph USER["👤 You (Product Owner)"]
+        IDEA["Project Idea"]
+    end
+
+    subgraph ORCH["🎯 BMad Orchestrator (Team Lead)"]
+        direction TB
+        PHASE["Phase Manager"]
+        GATE["Quality Gates"]
+        SPAWN["Agent Spawner"]
+    end
+
+    subgraph P1["Phase 1: Discovery"]
+        BA["🔍 Business Analyst"]
+        BRIEF["📄 Product Brief"]
+        BA --> BRIEF
+    end
+
+    subgraph P2["Phase 2: Planning (Parallel)"]
+        direction LR
+        PM["📋 Product Manager"]
+        UX["🎨 UX Designer"]
+        PRD["📄 PRD"]
+        UXDOC["📄 UX Spec"]
+        PM --> PRD
+        UX --> UXDOC
+    end
+
+    subgraph P3["Phase 3: Architecture"]
+        ARCH["🏗️ System Architect"]
+        ARCHDOC["📄 Architecture"]
+        ADRS["📄 ADRs"]
+        SOLGATE{"🚦 90% Gate"}
+        ARCH --> ARCHDOC
+        ARCH --> ADRS
+        ARCHDOC --> SOLGATE
+    end
+
+    subgraph P4["Phase 4: Sprint Planning"]
+        SM["📊 Scrum Master"]
+        SPRINT["📄 Sprint Plan"]
+        STORIES["📄 Stories"]
+        SM --> SPRINT
+        SM --> STORIES
+    end
+
+    subgraph P5["Phase 5: Implementation (Agent Team - Parallel!)"]
+        direction LR
+        subgraph DB_TRACK["Database Track"]
+            DBE["🗄️ DB Engineer"]
+            SCHEMA["Schema + Migrations"]
+            DBE --> SCHEMA
+        end
+        subgraph BE_TRACK["Backend Track"]
+            BED["⚙️ Backend Dev"]
+            API["API Routes + Logic"]
+            BED --> API
+        end
+        subgraph FE_TRACK["Frontend Track"]
+            FED["🖥️ Frontend Dev"]
+            UICODE["UI Components + Pages"]
+            FED --> UICODE
+        end
+    end
+
+    subgraph P6["Phase 6: Quality"]
+        QA["🧪 QA Engineer"]
+        TESTS["📄 Test Plan + Results"]
+        QA --> TESTS
+    end
+
+    subgraph P7["Phase 7: Deployment"]
+        DEVOPS["🚀 DevOps Engineer"]
+        DEPLOY["📄 Deploy Config + CI/CD"]
+        DEVOPS --> DEPLOY
+    end
+
+    subgraph P8["Phase 8: Final Review"]
+        TL["👔 Tech Lead"]
+        REVIEW["📄 Review Checklist"]
+        VERDICT{"✅ Ship?"}
+        TL --> REVIEW
+        REVIEW --> VERDICT
+    end
+
+    IDEA --> ORCH
+    ORCH --> P1
+    BRIEF --> P2
+    PRD --> P3
+    UXDOC --> P3
+    SOLGATE -->|"≥90%"| P4
+    SOLGATE -->|"<90%"| ARCH
+    STORIES --> P5
+    SCHEMA --> P6
+    API --> P6
+    UICODE --> P6
+    TESTS --> P7
+    DEPLOY --> P8
+    VERDICT -->|"SHIP ✅"| DONE["🎉 Production!"]
+    VERDICT -->|"DO NOT SHIP ❌"| P5
+
+    style P5 fill:#1a1a2e,stroke:#e94560,stroke-width:3px
+    style ORCH fill:#16213e,stroke:#0f3460,stroke-width:2px
+    style SOLGATE fill:#ffd700,stroke:#333,stroke-width:2px
+    style VERDICT fill:#ffd700,stroke:#333,stroke-width:2px
+    style DONE fill:#00b894,stroke:#333,stroke-width:2px

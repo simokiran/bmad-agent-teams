@@ -1,0 +1,32 @@
+# Node
+node_modules/
+npm-debug.log
+yarn-error.log
+package-lock.json
+yarn.lock
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Backups
+*.bak
+*-OLD.*
+
+# Logs
+logs/
+*.log
+
+# Test coverage
+coverage/
+
+# Temp
+tmp/
+temp/

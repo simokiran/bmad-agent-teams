@@ -1,0 +1,34 @@
+# Development files
+.git/
+.github/
+.vscode/
+.idea/
+
+# Documentation (except what's in package.json files array)
+docs/architecture-diagram.mermaid
+
+# Backups and temp
+*-OLD.*
+*.bak
+tmp/
+temp/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Test files (if we add them later)
+tests/
+test/
+*.test.js
+*.spec.js
+
+# CI/CD
+.travis.yml
+.circleci/
+.github/
+
+# Development
+node_modules/
+npm-debug.log
+yarn-error.log

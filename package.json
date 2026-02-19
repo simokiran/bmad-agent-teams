@@ -1,0 +1,52 @@
+{
+  "name": "@bmad-code/agent-teams",
+  "version": "1.0.0",
+  "description": "BMad Method for Claude Code - Ship production software with a 12-agent AI development team orchestrated from a single chat session",
+  "main": "index.js",
+  "bin": {
+    "bmad-agent-teams": "./cli.js"
+  },
+  "scripts": {
+    "test": "echo \"No tests yet\" && exit 0"
+  },
+  "keywords": [
+    "bmad",
+    "claude-code",
+    "ai-agents",
+    "agent-teams",
+    "agile",
+    "ai-development",
+    "claude",
+    "anthropic"
+  ],
+  "author": "BMad Method Contributors",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bmad-code-org/bmad-agent-teams"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "files": [
+    ".claude/",
+    "templates/",
+    "scripts/",
+    "install.sh",
+    "CLAUDE.md",
+    "cli.js",
+    "index.js",
+    "README.md",
+    "USAGE-GUIDE.md",
+    "WORKED-EXAMPLE.md",
+    "ADVANCED-CONFIG.md",
+    "CHANGELOG.md",
+    "DEVELOPMENT.md",
+    "ROADMAP.md",
+    "CONTRIBUTING.md",
+    "LICENSE"
+  ],
+  "peerDependencies": {
+    "@anthropic-ai/claude-code": ">=0.1.0"
+  }
+}
