@@ -60,10 +60,35 @@ These are HIGH-LEVEL criteria. Story-level ACs will be more granular.
 - **Key Architecture Decisions**: [Reference ADRs]
 
 ## Track Distribution Guidance
-Provide guidance for story writers on how to split work across tracks:
-- **Database stories**: [e.g., "User table schema, session table, indexes"]
-- **Backend stories**: [e.g., "Auth middleware, login/register/logout endpoints, password reset"]
-- **Frontend stories**: [e.g., "Login page, register page, forgot password flow, auth context"]
+Provide guidance for story writers on how to split work across tracks. **Reference `docs/naming-registry.md`** for all entity names.
+
+- **Database stories (ALWAYS START HERE)**:
+  - Schema creation (tables, columns - check naming registry)
+  - Indexes and constraints
+  - Migrations and seed data
+  - Example: "Create users table with email, password_hash, created_at columns"
+
+- **Backend stories (AFTER DATABASE)**:
+  - API endpoints (check naming registry for routes)
+  - Business logic and services
+  - TypeScript types (check naming registry for type names)
+  - Middleware and authentication
+  - Example: "Implement POST /api/auth/register endpoint with RegisterRequest type"
+
+- **Frontend stories (AFTER BACKEND)**:
+  - Pages and routes (check naming registry for route names)
+  - Components (check naming registry for component names)
+  - Forms and validation (check naming registry for form field names)
+  - State management
+  - Example: "Create RegisterForm component with email/password/name fields"
+
+### Naming Registry Reference
+**CRITICAL**: All story writers MUST check `docs/naming-registry.md` before creating stories to:
+- ✅ Use correct table/column names
+- ✅ Use correct API endpoint paths
+- ✅ Use correct TypeScript type names
+- ✅ Use correct form field names
+- ✅ Maintain consistency across all layers
 
 ## Dependencies
 - **Depends on**: [Other epics this blocks on — e.g., "None, this is foundational"]

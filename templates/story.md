@@ -35,17 +35,38 @@ Individual committable units of work. Each task = one git commit.
 
 ## Technical Notes
 
+### Naming Registry References
+**CRITICAL**: Check `docs/naming-registry.md` for all entity names. Update the registry after implementation.
+
+#### Database Names (if applicable)
+- Tables: `[table_name]` (snake_case - see Section 1 of naming registry)
+- Columns: `[column_name]` (snake_case - see Section 1 of naming registry)
+- Indexes: `idx_[table]_[column]` (see Section 1 of naming registry)
+
+#### API Names (if applicable)
+- Endpoints: `[METHOD] /api/[path]` (kebab-case path - see Section 2 of naming registry)
+- Request types: `[Entity]Request` (PascalCase - see Section 3 of naming registry)
+- Response types: `[Entity]Response` (PascalCase - see Section 3 of naming registry)
+
+#### Frontend Names (if applicable)
+- Routes: `/[path]` (lowercase, hyphenated - see Section 4 of naming registry)
+- Components: `[ComponentName]` (PascalCase - see Section 5 of naming registry)
+- Form fields: `[fieldName]` (camelCase - see Section 6 of naming registry)
+
 ### Files to Create
 - `src/[path]/[filename]` — [Purpose]
 
 ### Files to Modify
 - `src/[path]/[filename]` — [What change]
 
-### API Endpoints (if applicable)
-- `[METHOD] /api/[path]` — [Description]
-
-### Database Changes (if applicable)
-- Migration: `NNN_[description]` — [What it does]
+### Cross-Layer Mapping
+Example: If this story involves user registration:
+```
+DB:       users.email (VARCHAR)
+API:      POST /api/auth/register { email: string }
+Type:     RegisterRequest { email: string }
+Frontend: <input name="email" />
+```
 
 ### Key Architecture Decisions
 - See `docs/adrs/ADR-NNN-[topic].md`

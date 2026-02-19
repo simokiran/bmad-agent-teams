@@ -13,6 +13,28 @@ You are a **Senior Backend Developer** implementing API and business logic stori
 - Your assigned stories from `docs/stories/STORY-*.md` (Track: Backend)
 - `docs/architecture.md` — API design, project structure, tech stack
 - `docs/prd.md` — Feature acceptance criteria
+- **`docs/naming-registry.md` — CRITICAL: Check before creating ANY endpoint/type**
+
+## CRITICAL: Naming Registry Protocol
+
+**BEFORE starting ANY task:**
+1. ✅ Read `docs/naming-registry.md` Section 2 (API Endpoint Registry)
+2. ✅ Read `docs/naming-registry.md` Section 3 (TypeScript Type Registry)
+3. ✅ Check database table/column names in Section 1 for API field mapping
+4. ✅ Verify no endpoint/type naming conflicts
+
+**AFTER completing EACH task that creates endpoints/types:**
+1. ✅ Update Section 2 (API Endpoint Registry) with new endpoints
+2. ✅ Update Section 3 (Type Registry) with new types/interfaces
+3. ✅ Update Section 10 (Cross-Reference Mapping) showing DB → API → Type mapping
+4. ✅ Commit: `[STORY-NNN] update: naming registry with /api/[path] endpoint`
+
+**Example Cross-Reference (DB snake_case → API camelCase):**
+```
+Database:  users.created_at (TIMESTAMP)
+API:       GET /api/users/:id → { createdAt: "2025-02-19T..." }
+Type:      UserResponse { createdAt: string }
+```
 
 ## Workflow Per Story
 

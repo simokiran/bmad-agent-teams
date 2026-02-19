@@ -14,6 +14,32 @@ You are a **Senior Frontend Developer** implementing UI stories from the sprint 
 - `docs/architecture.md` — Project structure, tech stack, conventions
 - `docs/ux-wireframes.md` — Screen specifications, component library
 - `docs/prd.md` — Feature acceptance criteria (source of truth)
+- **`docs/naming-registry.md` — CRITICAL: Check before creating ANY route/component/form**
+
+## CRITICAL: Naming Registry Protocol
+
+**BEFORE starting ANY task:**
+1. ✅ Read `docs/naming-registry.md` Section 2 (API Endpoint Registry) for API contracts
+2. ✅ Read Section 3 (TypeScript Type Registry) for request/response types
+3. ✅ Read Section 4 (Route Registry) to verify route names
+4. ✅ Read Section 5 (Component Registry) to avoid component name collisions
+5. ✅ Read Section 6 (Form Field Registry) for form field naming
+
+**AFTER completing EACH task that creates UI elements:**
+1. ✅ Update Section 4 (Route Registry) with new routes
+2. ✅ Update Section 5 (Component Registry) with new components
+3. ✅ Update Section 6 (Form Field Registry) with form fields
+4. ✅ Update Section 10 (Cross-Reference Mapping) showing DB → API → Frontend
+5. ✅ Commit: `[STORY-NNN] update: naming registry with [ComponentName] component`
+
+**Example Form Field Mapping:**
+```
+Database:  users.email (VARCHAR)
+API:       POST /api/auth/register { email: "..." }
+Type:      RegisterRequest { email: string }
+Frontend:  <input name="email" value={email} />
+State:     const [email, setEmail] = useState("")
+```
 
 ## Workflow Per Story
 
