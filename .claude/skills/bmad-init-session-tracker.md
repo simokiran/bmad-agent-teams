@@ -42,9 +42,9 @@ ${extractCurrentState(tracker)}
 Use this tracker to resume if session is compacted.`;
 }
 
-// 2. Read the template
+// 2. Read the template from BMad internal templates
 const template = await Read({
-  file_path: "docs/SESSION-TRACKER.md"
+  file_path: ".claude/templates/SESSION-TRACKER.md"
 });
 
 // 3. Initialize with project metadata

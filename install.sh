@@ -49,8 +49,10 @@ echo ""
 echo "Creating project structure..."
 mkdir -p "${TARGET}/.claude/agents"
 mkdir -p "${TARGET}/.claude/commands"
-mkdir -p "${TARGET}/docs"
-mkdir -p "${TARGET}/templates"
+mkdir -p "${TARGET}/.claude/skills"
+mkdir -p "${TARGET}/.claude/templates"  # BMad internal templates
+mkdir -p "${TARGET}/docs"  # Project docs (created by workflow)
+mkdir -p "${TARGET}/templates"  # Document templates for project
 mkdir -p "${TARGET}/scripts"
 
 # These directories will be created by /bmad-init command:
@@ -87,9 +89,24 @@ if [[ -d "${SCRIPT_DIR}/.claude/agents" ]]; then
   echo -e "  ${GREEN}✅ 12 agent definitions${NC}"
   
   # Copy commands
-  cp -r "${SCRIPT_DIR}/.claude/commands/"* "${TARGET}/.claude/commands/"
-  echo -e "  ${GREEN}✅ 8 slash commands${NC}"
-  
+  if [[ -d "${SCRIPT_DIR}/.claude/commands" ]]; then
+    cp -r "${SCRIPT_DIR}/.claude/commands/"* "${TARGET}/.claude/commands/"
+    echo -e "  ${GREEN}✅ 8 slash commands${NC}"
+  fi
+
+  # Copy skills
+  if [[ -d "${SCRIPT_DIR}/.claude/skills" ]]; then
+    mkdir -p "${TARGET}/.claude/skills"
+    cp -r "${SCRIPT_DIR}/.claude/skills/"* "${TARGET}/.claude/skills/"
+    echo -e "  ${GREEN}✅ BMad skills${NC}"
+  fi
+
+  # Copy examples
+  if [[ -d "${SCRIPT_DIR}/examples" ]]; then
+    cp -r "${SCRIPT_DIR}/examples" "${TARGET}/"
+    echo -e "  ${GREEN}✅ Code examples${NC}"
+  fi
+
   # Copy settings (don't overwrite existing)
   if [[ ! -f "${TARGET}/.claude/settings.json" ]]; then
     cp "${SCRIPT_DIR}/.claude/settings.json" "${TARGET}/.claude/settings.json"
@@ -117,7 +134,14 @@ if [[ -d "${SCRIPT_DIR}/.claude/agents" ]]; then
   cp -r "${SCRIPT_DIR}/scripts/"* "${TARGET}/scripts/" 2>/dev/null || true
   chmod +x "${TARGET}/scripts/"*.sh 2>/dev/null || true
   echo -e "  ${GREEN}✅ Orchestration scripts${NC}"
-  
+
+  # Copy BMad internal templates (SESSION-TRACKER, etc.)
+  if [[ -f "${SCRIPT_DIR}/docs/SESSION-TRACKER.md" ]]; then
+    mkdir -p "${TARGET}/.claude/templates"
+    cp "${SCRIPT_DIR}/docs/SESSION-TRACKER.md" "${TARGET}/.claude/templates/"
+    echo -e "  ${GREEN}✅ Session tracker template${NC}"
+  fi
+
 else
   echo -e "${YELLOW}Cannot find BMad source files. Run this script from the bmad-agent-teams directory.${NC}"
   exit 1
