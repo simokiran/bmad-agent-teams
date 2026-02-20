@@ -57,7 +57,7 @@ Tokens: 2,000
 ```markdown
 ## API Route Pattern
 
-See: examples/api-patterns/nextjs-api-route.ts
+See: .claude/examples/api-patterns/nextjs-api-route.ts
 
 Key points:
 - Use Zod for validation (Schema.safeParse)

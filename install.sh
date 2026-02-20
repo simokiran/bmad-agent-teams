@@ -50,10 +50,10 @@ echo "Creating project structure..."
 mkdir -p "${TARGET}/.claude/agents"
 mkdir -p "${TARGET}/.claude/commands"
 mkdir -p "${TARGET}/.claude/skills"
-mkdir -p "${TARGET}/.claude/templates"  # BMad internal templates
-mkdir -p "${TARGET}/docs"  # Project docs (created by workflow)
-mkdir -p "${TARGET}/templates"  # Document templates for project
-mkdir -p "${TARGET}/scripts"
+mkdir -p "${TARGET}/.claude/templates"
+mkdir -p "${TARGET}/.claude/examples"
+mkdir -p "${TARGET}/.claude/scripts"
+mkdir -p "${TARGET}/docs"  # Project docs (created by bmad-init workflow)
 
 # These directories will be created by /bmad-init command:
 # - docs/stories/
@@ -101,9 +101,9 @@ if [[ -d "${SCRIPT_DIR}/.claude/agents" ]]; then
     echo -e "  ${GREEN}✅ BMad skills${NC}"
   fi
 
-  # Copy examples
+  # Copy examples to .claude/examples/
   if [[ -d "${SCRIPT_DIR}/examples" ]]; then
-    cp -r "${SCRIPT_DIR}/examples" "${TARGET}/"
+    cp -r "${SCRIPT_DIR}/examples/"* "${TARGET}/.claude/examples/" 2>/dev/null || true
     echo -e "  ${GREEN}✅ Code examples${NC}"
   fi
 
@@ -114,26 +114,19 @@ if [[ -d "${SCRIPT_DIR}/.claude/agents" ]]; then
   else
     echo -e "  ${YELLOW}⏭️  settings.json already exists (skipped)${NC}"
   fi
-  
-  # Copy CLAUDE.md (don't overwrite)
-  if [[ ! -f "${TARGET}/CLAUDE.md" ]]; then
-    cp "${SCRIPT_DIR}/CLAUDE.md" "${TARGET}/CLAUDE.md"
-    echo -e "  ${GREEN}✅ CLAUDE.md${NC}"
-  else
-    echo -e "  ${YELLOW}⏭️  CLAUDE.md already exists — appending BMad section${NC}"
-    echo "" >> "${TARGET}/CLAUDE.md"
-    echo "<!-- BMad Method Integration -->" >> "${TARGET}/CLAUDE.md"
-    cat "${SCRIPT_DIR}/CLAUDE.md" >> "${TARGET}/CLAUDE.md"
+
+  # Copy templates to .claude/templates/
+  if [[ -d "${SCRIPT_DIR}/templates" ]]; then
+    cp -r "${SCRIPT_DIR}/templates/"* "${TARGET}/.claude/templates/" 2>/dev/null || true
+    echo -e "  ${GREEN}✅ Document templates${NC}"
   fi
-  
-  # Copy templates
-  cp -r "${SCRIPT_DIR}/templates/"* "${TARGET}/templates/" 2>/dev/null || true
-  echo -e "  ${GREEN}✅ Document templates${NC}"
-  
-  # Copy scripts
-  cp -r "${SCRIPT_DIR}/scripts/"* "${TARGET}/scripts/" 2>/dev/null || true
-  chmod +x "${TARGET}/scripts/"*.sh 2>/dev/null || true
-  echo -e "  ${GREEN}✅ Orchestration scripts${NC}"
+
+  # Copy scripts to .claude/scripts/
+  if [[ -d "${SCRIPT_DIR}/scripts" ]]; then
+    cp -r "${SCRIPT_DIR}/scripts/"* "${TARGET}/.claude/scripts/" 2>/dev/null || true
+    chmod +x "${TARGET}/.claude/scripts/"*.sh 2>/dev/null || true
+    echo -e "  ${GREEN}✅ Orchestration scripts${NC}"
+  fi
 
   # Copy BMad internal templates (SESSION-TRACKER, etc.)
   if [[ -f "${SCRIPT_DIR}/docs/SESSION-TRACKER.md" ]]; then
@@ -172,14 +165,19 @@ echo -e "${BOLD}Installation complete!${NC}"
 echo ""
 echo "═══════════════════════════════════════════════════"
 echo ""
-echo "  Files installed:"
-echo "    .claude/agents/       — 12 agent definitions"
+echo "  BMad Framework installed to .claude/ directory:"
+echo "    .claude/agents/       — 15 agent definitions"
 echo "    .claude/commands/     — 8 slash commands"
+echo "    .claude/skills/       — BMad skills"
+echo "    .claude/templates/    — Document templates"
+echo "    .claude/examples/     — Code examples"
+echo "    .claude/scripts/      — Orchestration scripts"
 echo "    .claude/settings.json — Agent Teams enabled"
-echo "    templates/            — Document templates"
-echo "    scripts/              — Orchestration scripts"
-echo "    docs/                 — Document output directory"
-echo "    CLAUDE.md             — Project context template"
+echo ""
+echo "  Project directories (for your code):"
+echo "    docs/                 — Project documents (created by bmad-init)"
+echo "    src/                  — Your source code (created by bmad-init)"
+echo "    tests/                — Your tests (created by bmad-init)"
 echo ""
 echo "  To get started:"
 echo ""
