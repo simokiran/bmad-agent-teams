@@ -123,6 +123,16 @@ Mobile:   <TextInput keyboardType="email-address" />
 - [ ] Pushed
 - [ ] Done
 
-## Developer Notes
+## Implementation Details
 
-[Space for the developer to add implementation notes, decisions, or issues]
+**For detailed implementation notes, see**: `docs/stories/STORY-NNN-implementation.md`
+
+> Developers: Keep this story file LEAN (spec only). Put verbose notes, debugging logs, code snippets in the implementation log file. Other agents don't need to read implementation details.
+
+**Quick Notes** (optional, keep brief):
+- [One-line notes only, e.g., "Used bcrypt with 10 rounds"]
+- [Link to implementation log for details]
+
+---
+
+**Token Optimization**: Story spec stays ~5k tokens. Implementation log can be 10-15k tokens but is NOT re-read by other agents.
