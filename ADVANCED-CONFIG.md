@@ -227,3 +227,20 @@ The existing docs are updated, not replaced. New stories are created, and develo
 - Reduce story count per sprint
 - Use Lightweight Mode for simpler projects
 - Skip optional phases (UX, DevOps) for prototypes
+
+### "Agents hang waiting for permission"
+**Symptom**: Spawned agents show "Boondoggling..." for several minutes, haven't created output files
+
+**Cause**: Claude Code's hooks.json permissions don't automatically propagate to spawned subagents. Even though `.claude/hooks.json` exists with auto-approval rules, spawned agents still need explicit permission for file writes.
+
+**Solution (Manual Approval Workaround)**:
+1. **During first run**: When an agent hangs, look for permission prompts in the UI
+2. **Click "Always allow"** when prompted for Write/Edit to docs/ directory
+3. **Approve once per agent type** (Product Manager, UX Designer, etc.)
+4. **Future spawns**: The approval is remembered for that agent type
+
+**Why this happens**: BMad agents use streaming outputs (write files, return confirmations) for 99.5% token reduction. Spawned agents need write permissions to follow this pattern, but permissions don't inherit from parent session.
+
+**Alternative (not recommended)**: Modify orchestrator to receive full content and write files itself, but this violates BMad's token optimization strategy (20k tokens vs 100 tokens per agent).
+
+**Long-term fix**: This is a Claude Code platform limitation. Future updates may allow hooks.json to propagate to spawned agents automatically.

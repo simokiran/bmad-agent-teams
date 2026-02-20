@@ -213,6 +213,18 @@ BMad agents require autonomous file write permissions. Create `.claude/hooks.jso
 
 The installer automatically creates this file. If installing manually, create it first.
 
+### Known Limitation: Manual Approval Required
+
+Even with hooks.json configured, **spawned subagents may still request write permission** on first use. This is a Claude Code platform limitation - hooks permissions don't automatically propagate to spawned agents.
+
+**Workaround:**
+1. When an agent hangs, check for permission prompts in the UI
+2. Click **"Always allow"** when prompted for Write/Edit to docs/ directory
+3. Approve once per agent type (Product Manager, UX Designer, etc.)
+4. Future spawns of that agent type will remember the approval
+
+This manual approval is required to maintain BMad's streaming outputs pattern (agents write files, return 100-token confirmations instead of 20k-token full content).
+
 ## Testing Your Agent
 
 1. **Spawn Test**: Can orchestrator spawn it with minimal prompt?
