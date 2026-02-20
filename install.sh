@@ -115,6 +115,14 @@ if [[ -d "${SCRIPT_DIR}/.claude/agents" ]]; then
     echo -e "  ${YELLOW}⏭️  settings.json already exists (skipped)${NC}"
   fi
 
+  # Copy hooks.json (required for autonomous agent file writes)
+  if [[ ! -f "${TARGET}/.claude/hooks.json" ]]; then
+    cp "${SCRIPT_DIR}/.claude/hooks.json" "${TARGET}/.claude/hooks.json"
+    echo -e "  ${GREEN}✅ hooks.json (Agent auto-approval configured)${NC}"
+  else
+    echo -e "  ${YELLOW}⏭️  hooks.json already exists (skipped)${NC}"
+  fi
+
   # Copy templates to .claude/templates/
   if [[ -d "${SCRIPT_DIR}/templates" ]]; then
     cp -r "${SCRIPT_DIR}/templates/"* "${TARGET}/.claude/templates/" 2>/dev/null || true

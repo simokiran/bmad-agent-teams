@@ -1,0 +1,25 @@
+{
+  "permissions": {
+    "autoApprove": [
+      {
+        "tool": "Write",
+        "pathPattern": "docs/**/*",
+        "description": "Auto-approve writes to docs directory for BMad workflow"
+      },
+      {
+        "tool": "Edit",
+        "pathPattern": "docs/**/*",
+        "description": "Auto-approve edits to docs directory for BMad workflow"
+      },
+      {
+        "tool": "Task",
+        "description": "Auto-approve agent spawning for BMad workflow"
+      },
+      {
+        "tool": "Bash",
+        "commandPattern": "mkdir -p docs/**",
+        "description": "Auto-approve creating docs directories"
+      }
+    ]
+  }
+}

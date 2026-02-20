@@ -175,6 +175,44 @@ Agent uses Write tool to save docs/prd.md.
 Result: Persistent artifact for next agent.
 ```
 
+## Required Project Configuration
+
+### hooks.json (Critical)
+
+BMad agents require autonomous file write permissions. Create `.claude/hooks.json`:
+
+```json
+{
+  "permissions": {
+    "autoApprove": [
+      {
+        "tool": "Write",
+        "pathPattern": "docs/**/*",
+        "description": "Auto-approve writes to docs directory for BMad workflow"
+      },
+      {
+        "tool": "Edit",
+        "pathPattern": "docs/**/*",
+        "description": "Auto-approve edits to docs directory for BMad workflow"
+      },
+      {
+        "tool": "Task",
+        "description": "Auto-approve agent spawning for BMad workflow"
+      },
+      {
+        "tool": "Bash",
+        "commandPattern": "mkdir -p docs/**",
+        "description": "Auto-approve creating docs directories"
+      }
+    ]
+  }
+}
+```
+
+**Without hooks.json, agents will hang waiting for file write approval.**
+
+The installer automatically creates this file. If installing manually, create it first.
+
 ## Testing Your Agent
 
 1. **Spawn Test**: Can orchestrator spawn it with minimal prompt?
