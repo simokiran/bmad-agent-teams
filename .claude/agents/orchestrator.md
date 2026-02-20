@@ -467,25 +467,12 @@ await Promise.all([
     description: "Create PRD",
     prompt: `Create Product Requirements Document (PRD).
 
-**INPUT:**
-- Read: docs/product-brief.md
+INPUT: docs/product-brief.md
+OUTPUT: docs/prd.md
 
-**OUTPUT:**
-- Write to: docs/prd.md
-- Use template: .claude/templates/prd-template.md (if exists)
-
-**REQUIRED SECTIONS:**
-1. Project Overview
-2. User Personas (at least 2)
-3. Feature Matrix (all features with IDs: F-001, F-002, etc.)
-4. Acceptance Criteria (for each feature)
-5. Technical Requirements
-6. Success Metrics
-7. Timeline Estimates
-
-**OUTPUT PROTOCOL:**
+OUTPUT PROTOCOL:
 After writing docs/prd.md, return ONLY:
-"✅ PRD created. File: docs/prd.md. Features: [N]. Personas: [M]. Pages: [P]."
+"✅ PRD created. File: docs/prd.md. Features: [N]. Personas: [M]."
 
 DO NOT return the full PRD content in your response.`
   }),
@@ -495,22 +482,10 @@ DO NOT return the full PRD content in your response.`
     description: "Create UX wireframes",
     prompt: `Create UX wireframes and specifications.
 
-**INPUT:**
-- Read: docs/product-brief.md
+INPUT: docs/product-brief.md
+OUTPUT: docs/ux-wireframes.md
 
-**OUTPUT:**
-- Write to: docs/ux-wireframes.md
-- Use template: .claude/templates/ux-wireframes-template.md (if exists)
-
-**REQUIRED SECTIONS:**
-1. Information Architecture
-2. User Flows (key user journeys)
-3. Wireframe Descriptions (for each major screen/page)
-4. Component Specifications
-5. Responsive Design Notes
-6. Accessibility Considerations
-
-**OUTPUT PROTOCOL:**
+OUTPUT PROTOCOL:
 After writing docs/ux-wireframes.md, return ONLY:
 "✅ UX wireframes created. File: docs/ux-wireframes.md. Screens: [N]. Flows: [M]."
 
