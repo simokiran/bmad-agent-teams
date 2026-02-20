@@ -84,8 +84,14 @@ if [[ -d "${SCRIPT_DIR}/.claude/agents" ]]; then
   # Installing from cloned repo
   echo "Installing from local repository..."
   
-  # Copy agents
-  cp -r "${SCRIPT_DIR}/.claude/agents/"* "${TARGET}/.claude/agents/"
+  # Copy agents (exclude internal dev docs)
+  for agent in "${SCRIPT_DIR}/.claude/agents/"*.md; do
+    filename=$(basename "$agent")
+    # Exclude internal framework documentation
+    if [[ "$filename" != "orchestrator-token-optimization.md" ]]; then
+      cp "$agent" "${TARGET}/.claude/agents/"
+    fi
+  done
   echo -e "  ${GREEN}✅ 12 agent definitions${NC}"
   
   # Copy commands
