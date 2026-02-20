@@ -421,17 +421,150 @@ await Edit({
 - Output: `docs/product-brief.md`
 - Gate: Brief must include problem statement, target users, success metrics, MVP scope
 
+**Agent Spawn Pattern:**
+```typescript
+await Task({
+  subagent_type: "Business Analyst",
+  description: "Create Product Brief",
+  prompt: `Create Product Brief for the project.
+
+**INPUT:**
+- User's project description (from conversation context)
+- Any existing project documentation
+
+**OUTPUT:**
+- Write to: docs/product-brief.md
+- Use template: .claude/templates/product-brief-template.md (if exists)
+
+**REQUIRED SECTIONS:**
+1. Problem Statement
+2. Target Users
+3. Success Metrics
+4. MVP Scope
+5. Out of Scope
+6. Constraints
+7. Technical Context (if known)
+
+**OUTPUT PROTOCOL:**
+After writing docs/product-brief.md, return ONLY:
+"✅ Product Brief created. File: docs/product-brief.md. Sections: [N]. Pages: [M]."
+
+DO NOT return the full Product Brief content in your response.`
+});
+```
+
 ### Phase 2: Planning (PARALLEL)
 - Spawn: `product-manager` and `ux-designer` simultaneously as parallel subagents
 - Input: `docs/product-brief.md`
 - Output: `docs/prd.md`, `docs/ux-wireframes.md`
 - Gate: PRD must have user personas, feature matrix, acceptance criteria for each feature
 
+**Agent Spawn Pattern (Parallel):**
+```typescript
+await Promise.all([
+  Task({
+    subagent_type: "Product Manager",
+    description: "Create PRD",
+    prompt: `Create Product Requirements Document (PRD).
+
+**INPUT:**
+- Read: docs/product-brief.md
+
+**OUTPUT:**
+- Write to: docs/prd.md
+- Use template: .claude/templates/prd-template.md (if exists)
+
+**REQUIRED SECTIONS:**
+1. Project Overview
+2. User Personas (at least 2)
+3. Feature Matrix (all features with IDs: F-001, F-002, etc.)
+4. Acceptance Criteria (for each feature)
+5. Technical Requirements
+6. Success Metrics
+7. Timeline Estimates
+
+**OUTPUT PROTOCOL:**
+After writing docs/prd.md, return ONLY:
+"✅ PRD created. File: docs/prd.md. Features: [N]. Personas: [M]. Pages: [P]."
+
+DO NOT return the full PRD content in your response.`
+  }),
+
+  Task({
+    subagent_type: "UX Designer",
+    description: "Create UX wireframes",
+    prompt: `Create UX wireframes and specifications.
+
+**INPUT:**
+- Read: docs/product-brief.md
+
+**OUTPUT:**
+- Write to: docs/ux-wireframes.md
+- Use template: .claude/templates/ux-wireframes-template.md (if exists)
+
+**REQUIRED SECTIONS:**
+1. Information Architecture
+2. User Flows (key user journeys)
+3. Wireframe Descriptions (for each major screen/page)
+4. Component Specifications
+5. Responsive Design Notes
+6. Accessibility Considerations
+
+**OUTPUT PROTOCOL:**
+After writing docs/ux-wireframes.md, return ONLY:
+"✅ UX wireframes created. File: docs/ux-wireframes.md. Screens: [N]. Flows: [M]."
+
+DO NOT return the full wireframes content in your response.`
+  })
+]);
+```
+
 ### Phase 3: Architecture
 - Spawn: `architect`
 - Input: `docs/prd.md`, `docs/ux-wireframes.md`
 - Output: `docs/architecture.md`, `docs/adrs/`, `docs/naming-registry.md`, `docs/skills-required.md`
 - Gate: **Solutioning Gate Check** — architecture must score ≥90% on completeness rubric
+
+**Agent Spawn Pattern:**
+```typescript
+await Task({
+  subagent_type: "System Architect",
+  description: "Create architecture",
+  prompt: `Create system architecture and technical specifications.
+
+**INPUT:**
+- Read: docs/prd.md
+- Read: docs/ux-wireframes.md
+
+**OUTPUT:**
+- Write to: docs/architecture.md (main architecture document)
+- Create: docs/adrs/ADR-001.md, ADR-002.md, etc. (Architecture Decision Records)
+- Write to: docs/naming-registry.md (naming conventions across all layers)
+- Write to: docs/skills-required.md (Claude Code skills needed)
+
+**REQUIRED SECTIONS (architecture.md):**
+1. Technology Stack Selection
+2. System Architecture (high-level)
+3. Database Design
+4. API Design
+5. Frontend Architecture
+6. Security Architecture
+7. Performance Strategy
+8. Deployment Architecture
+
+**REQUIRED OUTPUTS:**
+- docs/architecture.md (comprehensive)
+- docs/adrs/ (at least 3 ADRs for key decisions)
+- docs/naming-registry.md (database, API, types, components, files)
+- docs/skills-required.md (list of Claude Code skills to use)
+
+**OUTPUT PROTOCOL:**
+After writing all files, return ONLY:
+"✅ Architecture complete. Files: docs/architecture.md, [N] ADRs, naming-registry.md, skills-required.md. Tech stack: [summary]. Quality gate: [score]/100."
+
+DO NOT return the full architecture content in your response.`
+});
+```
 
 **TOKEN OPTIMIZATION - After Phase 3:**
 ```bash
@@ -447,6 +580,43 @@ Skill("bmad-generate-summary")
 - Output: `docs/epics/EPIC-*.md`, `docs/sprint-plan.md`
 - The Scrum Master creates **Epics** (one per major PRD feature group) and assigns them to sprints.
 - Gate: All PRD features mapped to epics, sprint plan has epic assignments and track allocation
+
+**Agent Spawn Pattern:**
+```typescript
+await Task({
+  subagent_type: "Scrum Master",
+  description: "Create epics and sprint plan",
+  prompt: `Create Epics and Sprint Plan.
+
+**INPUT:**
+- Read: docs/prd.md (all features)
+- Read: docs/architecture.md (technical constraints)
+- Read: docs/ux-wireframes.md (UX requirements)
+- Read: docs/PROJECT-SUMMARY.md (if exists)
+
+**OUTPUT:**
+- Create epic files: docs/epics/EPIC-001.md, EPIC-002.md, etc.
+- Write to: docs/sprint-plan.md
+- Use template: .claude/templates/epic-template.md (for each epic)
+
+**EPIC STRUCTURE:**
+- One epic per major PRD feature group
+- Each epic assigned to a track (Frontend, Backend, Database, Mobile)
+- Each epic has story number range (EPIC-001 → STORY-001 to STORY-099)
+
+**SPRINT PLAN STRUCTURE:**
+- Sprint assignments (which epics in which sprint)
+- Track allocation (Frontend, Backend, Database, Mobile)
+- Dependencies between epics
+- Estimated timeline
+
+**OUTPUT PROTOCOL:**
+After creating all epic files and sprint-plan.md, return ONLY:
+"✅ Epics and sprint plan created. Epics: [N] (EPIC-001 to EPIC-NNN). Sprint plan: [M] sprints. All PRD features mapped: Yes."
+
+DO NOT return the full epic/sprint plan content in your response.`
+});
+```
 
 ### Phase 4b: Story Creation (PARALLEL — one agent per epic!)
 - Spawn: One `story-writer` subagent **per epic** simultaneously
@@ -608,18 +778,124 @@ await Task({
 // Savings: 58k tokens (97% reduction!)
 ```
 
-**Dependency Order (Sequential + Parallel):**
+**Complete Phase 5 Spawn Pattern (Sequential + Parallel):**
 ```typescript
-// 1. Database first (no dependencies)
-await Task({ subagent_type: "Database Engineer", ... });
+// 1. Database Engineer (no dependencies - runs first)
+await Task({
+  subagent_type: "Database Engineer",
+  description: "Implement database stories",
+  prompt: `Implement Database track stories.
 
-// 2. Backend next (depends on database)
-await Task({ subagent_type: "Backend Developer", ... });
+**INPUT:**
+- Read: docs/PROJECT-SUMMARY.md (tech stack, naming)
+- Read: docs/naming-registry.md (database naming conventions)
+- Stories to implement: docs/stories/STORY-001.md through STORY-NNN.md (filter by track: Database)
+
+**OUTPUT:**
+- Write code to: src/database/ (migrations, seeds, models)
+- Write tests to: tests/database/
+- Update stories: Mark tasks complete with commit SHAs
+
+**GIT WORKFLOW:**
+- Every task complete → git commit with [STORY-NNN] prefix
+- Record commit SHA in story file
+- All stories complete → git push
+
+**OUTPUT PROTOCOL:**
+After completing all database stories, return ONLY:
+"✅ Database stories complete. Files: [list]. Migrations: [N]. Seeds: [M]. Tests: [P]. All pushed: Yes/No."
+
+DO NOT return full code in your response.`
+});
+
+// 2. Backend Developer (depends on database - runs second)
+await Task({
+  subagent_type: "Backend Developer",
+  description: "Implement backend stories",
+  prompt: `Implement Backend track stories.
+
+**INPUT:**
+- Read: docs/PROJECT-SUMMARY.md
+- Read: docs/naming-registry.md (API naming conventions)
+- Stories to implement: docs/stories/STORY-*.md (filter by track: Backend)
+- Database schema: src/database/ (created by Database Engineer)
+
+**OUTPUT:**
+- Write code to: src/api/ or src/backend/
+- Write tests to: tests/api/ or tests/backend/
+- Update stories: Mark tasks complete with commit SHAs
+
+**GIT WORKFLOW:**
+- Every task complete → git commit with [STORY-NNN] prefix
+- Record commit SHA in story file
+- All stories complete → git push
+
+**OUTPUT PROTOCOL:**
+After completing all backend stories, return ONLY:
+"✅ Backend stories complete. Files: [list]. Endpoints: [N]. Tests: [M]. All pushed: Yes/No."
+
+DO NOT return full code in your response.`
+});
 
 // 3. Frontend + Mobile in parallel (both depend on backend API)
 await Promise.all([
-  Task({ subagent_type: "Frontend Developer", ... }),
-  Task({ subagent_type: "Mobile Developer", ... })
+  Task({
+    subagent_type: "Frontend Developer",
+    description: "Implement frontend stories",
+    prompt: `Implement Frontend track stories.
+
+**INPUT:**
+- Read: docs/PROJECT-SUMMARY.md
+- Read: docs/naming-registry.md (component naming conventions)
+- Read: docs/ux-wireframes.md (UI specifications)
+- Stories to implement: docs/stories/STORY-*.md (filter by track: Frontend)
+- Backend API: src/api/ (created by Backend Developer)
+
+**OUTPUT:**
+- Write code to: src/components/, src/pages/, src/app/
+- Write tests to: tests/frontend/
+- Update stories: Mark tasks complete with commit SHAs
+
+**GIT WORKFLOW:**
+- Every task complete → git commit with [STORY-NNN] prefix
+- Record commit SHA in story file
+- All stories complete → git push
+
+**OUTPUT PROTOCOL:**
+After completing all frontend stories, return ONLY:
+"✅ Frontend stories complete. Files: [list]. Components: [N]. Pages: [M]. Tests: [P]. All pushed: Yes/No."
+
+DO NOT return full code in your response.`
+  }),
+
+  Task({
+    subagent_type: "Mobile Developer",
+    description: "Implement mobile stories",
+    prompt: `Implement Mobile track stories.
+
+**INPUT:**
+- Read: docs/PROJECT-SUMMARY.md
+- Read: docs/naming-registry.md (mobile naming conventions)
+- Read: docs/ux-wireframes.md (mobile UI specifications)
+- Stories to implement: docs/stories/STORY-*.md (filter by track: Mobile)
+- Backend API: src/api/ (created by Backend Developer)
+
+**OUTPUT:**
+- Write code to: mobile/src/ (screens, components, navigation)
+- Write tests to: mobile/tests/
+- Update stories: Mark tasks complete with commit SHAs
+
+**GIT WORKFLOW:**
+- Every task complete → git commit with [STORY-NNN] prefix
+- Record commit SHA in story file
+- All stories complete → git push
+
+**OUTPUT PROTOCOL:**
+After completing all mobile stories, return ONLY:
+"✅ Mobile stories complete. Files: [list]. Screens: [N]. Components: [M]. Tests: [P]. All pushed: Yes/No."
+
+DO NOT return full code in your response.`
+  })
 ]);
 ```
 
@@ -628,15 +904,118 @@ await Promise.all([
 - Output: `docs/test-plan.md`
 - Gate: All ACs verified, no critical bugs
 
+**Agent Spawn Pattern:**
+```typescript
+await Task({
+  subagent_type: "QA Engineer",
+  description: "Create test plan and run tests",
+  prompt: `Create comprehensive test plan and validate all acceptance criteria.
+
+**INPUT:**
+- Read: docs/stories/STORY-*.md (all stories with acceptance criteria)
+- Read: docs/prd.md (feature requirements)
+- Read: src/ and tests/ (implemented code and tests)
+
+**OUTPUT:**
+- Write to: docs/test-plan.md (comprehensive test plan)
+
+**TEST PLAN SECTIONS:**
+1. Test Strategy
+2. Acceptance Criteria Verification (per story)
+3. Test Cases (unit, integration, E2E)
+4. Test Results Summary
+5. Bug Report (if any)
+6. Quality Gate Status (Pass/Fail)
+
+**VALIDATION:**
+- Verify all story acceptance criteria are met
+- Run all tests (unit, integration, E2E)
+- Identify critical bugs
+- Sign off on quality gate
+
+**OUTPUT PROTOCOL:**
+After writing docs/test-plan.md and running tests, return ONLY:
+"✅ QA complete. File: docs/test-plan.md. Stories tested: [N]. Tests run: [M]. Passed: [P]. Failed: [F]. Critical bugs: [B]. Gate: Pass/Fail."
+
+DO NOT return the full test plan in your response.`
+});
+```
+
 ### Phase 7: Deployment
 - Spawn: `devops-engineer`
 - Output: `docs/deploy-config.md`
 - Gate: CI/CD pipeline defined
 
+**Agent Spawn Pattern:**
+```typescript
+await Task({
+  subagent_type: "DevOps Engineer",
+  description: "Create deployment configuration",
+  prompt: `Create deployment configuration and CI/CD pipeline.
+
+**INPUT:**
+- Read: docs/architecture.md (deployment architecture)
+- Read: docs/test-plan.md (testing requirements)
+- Read: src/ (application code)
+
+**OUTPUT:**
+- Write to: docs/deploy-config.md (deployment documentation)
+- Create: CI/CD configuration files (e.g., .github/workflows/, Dockerfile, etc.)
+
+**DEPLOYMENT CONFIG SECTIONS:**
+1. Environment Setup (dev, staging, production)
+2. CI/CD Pipeline (build, test, deploy stages)
+3. Deployment Steps
+4. Environment Variables
+5. Monitoring and Logging
+6. Rollback Strategy
+
+**OUTPUT PROTOCOL:**
+After writing docs/deploy-config.md and CI/CD configs, return ONLY:
+"✅ Deployment config complete. File: docs/deploy-config.md. Environments: [N]. CI/CD: Yes/No. Ready to deploy: Yes/No."
+
+DO NOT return the full deployment config in your response.`
+});
+```
+
 ### Phase 8: Final Review
 - Spawn: `tech-lead`
 - Output: `docs/review-checklist.md`
 - Gate: Ship / Ship with Notes / Do Not Ship verdict
+
+**Agent Spawn Pattern:**
+```typescript
+await Task({
+  subagent_type: "Tech Lead",
+  description: "Final review and ship decision",
+  prompt: `Conduct final technical review and provide ship/no-ship verdict.
+
+**INPUT:**
+- Read: ALL docs (product-brief, PRD, architecture, stories, test-plan, deploy-config)
+- Read: src/ and tests/ (all code)
+- Review: Git commit history, test results, quality gates
+
+**OUTPUT:**
+- Write to: docs/review-checklist.md (comprehensive review)
+
+**REVIEW CHECKLIST SECTIONS:**
+1. Code Quality Review
+2. Architecture Compliance
+3. Test Coverage Review
+4. Documentation Completeness
+5. Performance Assessment
+6. Security Review
+7. Deployment Readiness
+8. Risk Assessment
+9. **Final Verdict**: Ship / Ship with Notes / Do Not Ship
+
+**OUTPUT PROTOCOL:**
+After writing docs/review-checklist.md, return ONLY:
+"✅ Final review complete. File: docs/review-checklist.md. Verdict: [Ship/Ship with Notes/Do Not Ship]. Issues: [N]. Recommendations: [M]."
+
+DO NOT return the full review in your response.`
+});
+```
 
 ---
 
