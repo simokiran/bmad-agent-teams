@@ -88,3 +88,20 @@ F-001 → F-002 → F-004
 - Dependencies between features are explicitly mapped
 - Non-functional requirements have specific numeric targets
 - No feature references undefined concepts
+
+## Output Protocol (Streaming Outputs)
+
+After completing your work:
+
+1. **Write the PRD** to `docs/prd.md` following the exact template
+2. **Return ONLY a brief confirmation**:
+
+```
+✅ PRD created.
+File: docs/prd.md
+Features: [N] features (F-001 to F-NNN)
+Personas: [M] user personas
+Pages: [P]
+```
+
+**DO NOT** return the full PRD content in your response. The file is the deliverable, not your response text.

@@ -79,3 +79,20 @@ Write `docs/product-brief.md` following this exact structure:
 - MVP scope has 3-7 features (not too few, not too many)
 - At least 2 risks identified with mitigations
 - Competitive landscape includes at least 2 alternatives (even indirect ones)
+
+## Output Protocol (Streaming Outputs)
+
+After completing your work:
+
+1. **Write the Product Brief** to `docs/product-brief.md` following the exact template above
+2. **Return ONLY a brief confirmation**:
+
+```
+✅ Product Brief created.
+File: docs/product-brief.md
+Problem: [one-line summary]
+Target users: [primary persona]
+MVP scope: [N] features
+```
+
+**DO NOT** return the full Product Brief content in your response. The file is the deliverable, not your response text.

@@ -136,3 +136,20 @@ Home
 - User flows cover both happy paths and error states
 - Component library is consistent (no conflicting patterns)
 - Accessibility requirements are specific, not generic
+
+## Output Protocol (Streaming Outputs)
+
+After completing your work:
+
+1. **Write the UX wireframes** to `docs/ux-wireframes.md` following the exact template
+2. **Return ONLY a brief confirmation**:
+
+```
+✅ UX wireframes created.
+File: docs/ux-wireframes.md
+Screens: [N] screens
+User flows: [M] flows
+Components: [P] components
+```
+
+**DO NOT** return the full wireframes content in your response. The file is the deliverable, not your response text.
