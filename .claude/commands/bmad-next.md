@@ -2,17 +2,22 @@
 
 Automatically determine the current phase and advance by spawning appropriate agent(s).
 
+**IMPORTANT:** Use the spawn patterns from `.claude/agents/orchestrator.md` which include OUTPUT PROTOCOL.
+
 ## Phase Detection Logic
 
 ```
 IF docs/product-brief.md does NOT exist:
-  → Phase 1: Spawn Business Analyst (single subagent)
+  → Phase 1: Spawn Business Analyst
+  → Use orchestrator.md Phase 1 spawn pattern (includes OUTPUT PROTOCOL)
 
 ELSE IF docs/prd.md OR docs/ux-wireframes.md does NOT exist:
-  → Phase 2: Spawn PM + UX Designer (parallel subagents)
+  → Phase 2: Spawn Product Manager + UX Designer (parallel)
+  → Use orchestrator.md Phase 2 spawn pattern (includes OUTPUT PROTOCOL)
 
 ELSE IF docs/architecture.md does NOT exist:
-  → Phase 3: Spawn System Architect (single subagent)
+  → Phase 3: Spawn System Architect
+  → Use orchestrator.md Phase 3 spawn pattern (includes OUTPUT PROTOCOL)
   → Must pass 90% Solutioning Gate before proceeding
 
 ELSE IF docs/epics/ is empty (no EPIC-*.md files):
@@ -96,6 +101,47 @@ After all story writers complete, run the Phase 4b gate:
 - All stories have Git Task Tracking section
 - Story numbers don't overlap between epics
 - Cross-epic dependencies are mapped
+
+## Phase Spawn Patterns (Use These!)
+
+### Phase 1 Spawn:
+```typescript
+await Task({
+  subagent_type: "Business Analyst",
+  description: "Create Product Brief",
+  prompt: `Create Product Brief.
+INPUT: Read user's project description
+OUTPUT: Write to docs/product-brief.md
+OUTPUT PROTOCOL: Return ONLY "✅ Product Brief created. File: docs/product-brief.md."
+DO NOT return full content.`
+});
+```
+
+### Phase 2 Spawn (Parallel):
+```typescript
+await Promise.all([
+  Task({
+    subagent_type: "Product Manager",
+    description: "Create PRD",
+    prompt: `Create PRD.
+INPUT: Read docs/product-brief.md
+OUTPUT: Write to docs/prd.md
+OUTPUT PROTOCOL: Return ONLY "✅ PRD created. File: docs/prd.md. Features: [N]."
+DO NOT return full content.`
+  }),
+  Task({
+    subagent_type: "UX Designer",
+    description: "Create UX wireframes",
+    prompt: `Create UX wireframes.
+INPUT: Read docs/product-brief.md
+OUTPUT: Write to docs/ux-wireframes.md
+OUTPUT PROTOCOL: Return ONLY "✅ UX wireframes created. File: docs/ux-wireframes.md. Screens: [N]."
+DO NOT return full content.`
+  })
+]);
+```
+
+**For other phases:** See `.claude/agents/orchestrator.md` for complete spawn patterns with OUTPUT PROTOCOL.
 
 ## User Approval Checkpoints
 
