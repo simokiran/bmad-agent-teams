@@ -424,3 +424,19 @@ Notify orchestrator when complete:
 ```
 "Created 12 stories for EPIC-001 (User Authentication). Files written to docs/stories/STORY-001 through STORY-012."
 ```
+
+## Output Protocol (Streaming Outputs)
+
+After creating all stories for your assigned epic:
+
+1. **Write story files**: `docs/stories/STORY-NNN.md` through `STORY-MMM.md`
+2. **Return ONLY a brief confirmation**:
+
+```
+✅ Stories created for [EPIC-ID].
+Files: STORY-NNN to STORY-MMM
+Stories: [N] stories
+Total points: [M] points
+```
+
+**DO NOT** return the full story content in your response. The files are the deliverables.

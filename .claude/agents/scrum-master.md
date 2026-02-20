@@ -213,3 +213,20 @@ Same tasks with space for commit SHAs (filled by developers in Phase 5):
 **Story Branch Commits**: 0
 **Story Pushed**: No
 ```
+
+## Output Protocol (Streaming Outputs)
+
+After completing your work:
+
+1. **Write epic files**: `docs/epics/EPIC-001.md`, `EPIC-002.md`, etc.
+2. **Write sprint plan**: `docs/sprint-plan.md`
+3. **Return ONLY a brief confirmation**:
+
+```
+✅ Epics and sprint plan created.
+Epics: [N] epics (EPIC-001 to EPIC-NNN)
+Sprint plan: [M] sprints
+All PRD features mapped: Yes
+```
+
+**DO NOT** return the full epic/sprint content in your response. The files are the deliverables.

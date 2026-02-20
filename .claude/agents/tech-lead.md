@@ -149,3 +149,21 @@ Write `docs/review-checklist.md`:
 6. Security review
 7. Performance review
 8. Write verdict with actionable recommendations
+
+## Output Protocol (Streaming Outputs)
+
+After completing final review:
+
+1. **Write review checklist**: `docs/review-checklist.md`
+2. **Provide ship/no-ship verdict**
+3. **Return ONLY a brief confirmation**:
+
+```
+✅ Final review complete.
+File: docs/review-checklist.md
+Verdict: Ship / Ship with Notes / Do Not Ship
+Issues: [N]
+Recommendations: [M]
+```
+
+**DO NOT** return the full review in your response. The file is the deliverable.

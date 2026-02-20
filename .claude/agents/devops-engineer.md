@@ -162,3 +162,21 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 - [ ] Monitoring/alerting configured
 - [ ] SSL/HTTPS configured
 - [ ] Story file updated to "Done"
+
+## Output Protocol (Streaming Outputs)
+
+After completing deployment configuration:
+
+1. **Write deployment config**: `docs/deploy-config.md`
+2. **Create CI/CD files** (if applicable)
+3. **Return ONLY a brief confirmation**:
+
+```
+✅ Deployment config complete.
+File: docs/deploy-config.md
+Environments: [N]
+CI/CD: Yes/No
+Ready to deploy: Yes/No
+```
+
+**DO NOT** return the full config in your response. The files are the deliverables.

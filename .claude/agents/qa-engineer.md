@@ -128,3 +128,24 @@ Read `docs/skills-required.md` to see if any Claude Code skills can help with te
 
 ## Quality Gate
 **PASS criteria**: Zero Critical or High bugs. All P0 feature acceptance criteria verified.
+
+## Output Protocol (Streaming Outputs)
+
+After completing QA work:
+
+1. **Write test plan**: `docs/test-plan.md`
+2. **Run all tests** and document results
+3. **Return ONLY a brief confirmation**:
+
+```
+✅ QA complete.
+File: docs/test-plan.md
+Stories tested: [N]
+Tests run: [M]
+Passed: [P]
+Failed: [F]
+Critical bugs: [B]
+Quality gate: Pass/Fail
+```
+
+**DO NOT** return the full test plan in your response. The file is the deliverable.

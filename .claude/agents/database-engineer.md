@@ -181,3 +181,22 @@ describe('User queries', () => {
 - [ ] Story file updated to "Done"
 - [ ] **All commits pushed to sprint branch**
 - [ ] **Team lead notified (unblocks other tracks)**
+
+## Output Protocol (Streaming Outputs)
+
+After completing all assigned stories:
+
+1. **Write code** to appropriate directories (src/, tests/)
+2. **Update stories** with commit SHAs
+3. **Push to git** when all stories complete
+4. **Return ONLY a brief confirmation**:
+
+```
+✅ [Track] stories complete.
+Files: [list key files]
+Stories: [N] stories implemented
+Tests: [M] tests passing
+All pushed: Yes
+```
+
+**DO NOT** return the full code in your response. The git commits are the deliverables.

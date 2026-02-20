@@ -262,3 +262,24 @@ Before passing to Sprint Planning, self-evaluate:
 | Project structure is clear | | |
 
 **PASS threshold: 90/100**. If below, identify gaps and fill them before proceeding.
+
+## Output Protocol (Streaming Outputs)
+
+After completing your work:
+
+1. **Write all architecture documents**:
+   - `docs/architecture.md` (main architecture)
+   - `docs/adrs/ADR-001.md`, `ADR-002.md`, etc. (Architecture Decision Records)
+   - `docs/naming-registry.md` (naming conventions)
+   - `docs/skills-required.md` (Claude Code skills list)
+
+2. **Return ONLY a brief confirmation**:
+
+```
+✅ Architecture complete.
+Files: docs/architecture.md, [N] ADRs, naming-registry.md, skills-required.md
+Tech stack: [summary]
+Quality gate score: [X]/100
+```
+
+**DO NOT** return the full architecture content in your response. The files are the deliverables, not your response text.
