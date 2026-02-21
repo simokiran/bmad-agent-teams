@@ -1,109 +1,77 @@
----
-title: BMad Method — 12-Agent Workflow Architecture
----
-graph TB
-    subgraph USER["👤 You (Product Owner)"]
-        IDEA["Project Idea"]
-    end
-
-    subgraph ORCH["🎯 BMad Orchestrator (Team Lead)"]
-        direction TB
-        PHASE["Phase Manager"]
-        GATE["Quality Gates"]
-        SPAWN["Agent Spawner"]
-    end
-
-    subgraph P1["Phase 1: Discovery"]
-        BA["🔍 Business Analyst"]
-        BRIEF["📄 Product Brief"]
-        BA --> BRIEF
-    end
-
-    subgraph P2["Phase 2: Planning (Parallel)"]
-        direction LR
-        PM["📋 Product Manager"]
-        UX["🎨 UX Designer"]
-        PRD["📄 PRD"]
-        UXDOC["📄 UX Spec"]
-        PM --> PRD
-        UX --> UXDOC
-    end
-
-    subgraph P3["Phase 3: Architecture"]
-        ARCH["🏗️ System Architect"]
-        ARCHDOC["📄 Architecture"]
-        ADRS["📄 ADRs"]
-        SOLGATE{"🚦 90% Gate"}
-        ARCH --> ARCHDOC
-        ARCH --> ADRS
-        ARCHDOC --> SOLGATE
-    end
-
-    subgraph P4["Phase 4: Sprint Planning"]
-        SM["📊 Scrum Master"]
-        SPRINT["📄 Sprint Plan"]
-        STORIES["📄 Stories"]
-        SM --> SPRINT
-        SM --> STORIES
-    end
-
-    subgraph P5["Phase 5: Implementation (Agent Team - Parallel!)"]
-        direction LR
-        subgraph DB_TRACK["Database Track"]
-            DBE["🗄️ DB Engineer"]
-            SCHEMA["Schema + Migrations"]
-            DBE --> SCHEMA
-        end
-        subgraph BE_TRACK["Backend Track"]
-            BED["⚙️ Backend Dev"]
-            API["API Routes + Logic"]
-            BED --> API
-        end
-        subgraph FE_TRACK["Frontend Track"]
-            FED["🖥️ Frontend Dev"]
-            UICODE["UI Components + Pages"]
-            FED --> UICODE
-        end
-    end
-
-    subgraph P6["Phase 6: Quality"]
-        QA["🧪 QA Engineer"]
-        TESTS["📄 Test Plan + Results"]
-        QA --> TESTS
-    end
-
-    subgraph P7["Phase 7: Deployment"]
-        DEVOPS["🚀 DevOps Engineer"]
-        DEPLOY["📄 Deploy Config + CI/CD"]
-        DEVOPS --> DEPLOY
-    end
-
-    subgraph P8["Phase 8: Final Review"]
-        TL["👔 Tech Lead"]
-        REVIEW["📄 Review Checklist"]
-        VERDICT{"✅ Ship?"}
-        TL --> REVIEW
-        REVIEW --> VERDICT
-    end
-
-    IDEA --> ORCH
-    ORCH --> P1
-    BRIEF --> P2
-    PRD --> P3
-    UXDOC --> P3
-    SOLGATE -->|"≥90%"| P4
-    SOLGATE -->|"<90%"| ARCH
-    STORIES --> P5
-    SCHEMA --> P6
-    API --> P6
-    UICODE --> P6
-    TESTS --> P7
-    DEPLOY --> P8
-    VERDICT -->|"SHIP ✅"| DONE["🎉 Production!"]
-    VERDICT -->|"DO NOT SHIP ❌"| P5
-
-    style P5 fill:#1a1a2e,stroke:#e94560,stroke-width:3px
-    style ORCH fill:#16213e,stroke:#0f3460,stroke-width:2px
-    style SOLGATE fill:#ffd700,stroke:#333,stroke-width:2px
-    style VERDICT fill:#ffd700,stroke:#333,stroke-width:2px
-    style DONE fill:#00b894,stroke:#333,stroke-width:2px
+```mermaid
+flowchart TD
+    Start([User: Install BMad]) --> Init[/bmad-init]
+    
+    Init --> CreateFiles[Create project structure<br/>docs/, .claude/, etc.]
+    CreateFiles --> SpawnOrch[Spawn BMad Orchestrator<br/>Automated Mode]
+    
+    SpawnOrch --> Orch{BMad Orchestrator<br/>Running}
+    
+    Orch -->|Phase Detection| P1[Phase 1: Discovery<br/>Spawn Business Analyst]
+    P1 --> P1Done{Product Brief<br/>Created?}
+    P1Done -->|Yes| P2[Phase 2: Planning<br/>Spawn PM + UX parallel]
+    P1Done -->|No/Stopped| Stop1[Session Stopped<br/>Context full / User interrupt]
+    
+    P2 --> P2Done{PRD + UX<br/>Created?}
+    P2Done -->|Yes| P3[Phase 3: Architecture<br/>Spawn Architect]
+    P2Done -->|No/Stopped| Stop2[Session Stopped]
+    
+    P3 --> P3Done{Architecture<br/>90% Gate?}
+    P3Done -->|Yes| P4[Phase 4: Epics<br/>Spawn Scrum Master]
+    P3Done -->|No/Stopped| Stop3[Session Stopped]
+    
+    P4 --> P4Done{Epics +<br/>Sprint Plan?}
+    P4Done -->|Yes| P4b[Phase 4b: Stories<br/>Spawn Story Writers<br/>Parallel per Epic]
+    P4Done -->|No/Stopped| Stop4[Session Stopped]
+    
+    P4b --> P4bDone{All Stories<br/>Created?}
+    P4bDone -->|Yes| P5Decision{Check Sprint<br/>Scope}
+    P4bDone -->|No/Stopped| Stop5[Session Stopped]
+    
+    P5Decision -->|Small Sprint| P5Team[Phase 5: Implementation<br/>Create Agent Team<br/>DB + Backend + Frontend]
+    P5Decision -->|Large Sprint| P5Batch[Phase 5: Batched<br/>Implement 5 stories at a time]
+    
+    P5Team --> P5Done{All Stories<br/>Done?}
+    P5Batch --> P5Done
+    P5Done -->|Yes| P6[Phase 6: QA<br/>Spawn QA Engineer]
+    P5Done -->|No/Stopped| Stop6[Session Stopped]
+    
+    P6 --> P6Done{Tests Pass?}
+    P6Done -->|Yes| P7[Phase 7: Deploy<br/>Spawn DevOps]
+    P6Done -->|No/Stopped| Stop7[Session Stopped]
+    
+    P7 --> P7Done{Deploy Config<br/>Ready?}
+    P7Done -->|Yes| P8[Phase 8: Review<br/>Spawn Tech Lead]
+    P7Done -->|No/Stopped| Stop8[Session Stopped]
+    
+    P8 --> Complete([Project Complete!<br/>Ship Decision])
+    
+    %% Resume Flow
+    Stop1 --> Resume[User: /bmad-next]
+    Stop2 --> Resume
+    Stop3 --> Resume
+    Stop4 --> Resume
+    Stop5 --> Resume
+    Stop6 --> Resume
+    Stop7 --> Resume
+    Stop8 --> Resume
+    
+    Resume --> LoadOrch[Spawn BMad Orchestrator]
+    LoadOrch --> ReadTracker[Read session-tracker.md<br/>Detect current phase]
+    ReadTracker --> ResumePhase{Resume from<br/>where stopped}
+    
+    ResumePhase -->|Phase 1| P1
+    ResumePhase -->|Phase 2| P2
+    ResumePhase -->|Phase 3| P3
+    ResumePhase -->|Phase 4| P4
+    ResumePhase -->|Phase 4b| P4b
+    ResumePhase -->|Phase 5| P5Decision
+    ResumePhase -->|Phase 6| P6
+    ResumePhase -->|Phase 7| P7
+    ResumePhase -->|Phase 8| P8
+    
+    style Orch fill:#e1f5ff
+    style P5Team fill:#ffe1ff
+    style Resume fill:#fff4e1
+    style Complete fill:#e1ffe1
+```
