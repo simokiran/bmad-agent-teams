@@ -74,25 +74,34 @@ cd bmad-agent-teams
    claude
    ```
 
-4. **Initialize the BMad Method**:
+4. **Initialize and start**:
    ```
    /bmad-init
    ```
 
-5. **Describe your project**:
+   This will:
+   - Create project structure (docs/, src/, tests/)
+   - Initialize tracking files (YAML, session tracker, project dashboard)
+   - **Spawn BMad Orchestrator in automated mode**
+   - Orchestrator asks you to describe your project
+
+5. **Describe your project** (orchestrator will ask):
    ```
    I want to build a task management app with user authentication,
    project boards, and real-time collaboration features...
    ```
 
-6. **Let the agents work**! The orchestrator will guide you through each phase:
+6. **Orchestrator runs automatically!**
+   - Orchestrator runs Phase 1 → 8 automatically
+   - Updates you on progress
+   - You can stop anytime (Ctrl+C) and resume with `/bmad-next`
+
+   **Monitor progress:**
    ```
-   /bmad-status    # Check current progress
-   /bmad-next      # Advance to next phase
-   /bmad-track     # View project dashboard
+   /bmad-status    # Check current phase
+   /bmad-next      # Resume or advance to next phase
+   /bmad-track     # View epic/story dashboard
    /bmad-gate      # Run quality gate check
-   /bmad-sprint    # Begin implementation sprint
-   /bmad-review    # Trigger final review
    /bmad-help      # Get contextual help
    ```
 
@@ -100,18 +109,43 @@ cd bmad-agent-teams
 
 ### The Orchestration Model
 
-The BMad Method uses a **document-driven relay** architecture where a single Orchestrator agent manages 12 specialized agents through an 8-phase workflow. Agents communicate through documents (not shared memory), and work happens both sequentially and in parallel depending on the phase.
+The BMad Method uses an **Orchestrator-Driven** architecture where a single Orchestrator agent manages 12 specialized agents through an 8-phase workflow in **automated mode**.
 
 ```
-You → /bmad-init → Orchestrator → Spawns agents → Manages workflow → Ships product
+You → /bmad-init → Spawns Orchestrator (automated) → Runs Phase 1-8 → Ships product
+                        ↓
+          You can stop/resume anytime with /bmad-next
 ```
 
 The Orchestrator:
-- ✅ Spawns specialized agents at the right time
+- ✅ Runs in automated mode (Phase 1 → 8 automatically)
+- ✅ Spawns agents at the right time (parallel subagents or Agent Teams)
 - ✅ Manages phase transitions and quality gates
 - ✅ Coordinates parallel work (3 parallelization points)
 - ✅ Tracks progress through all phases
-- ✅ Never writes code (only manages agents)
+- ✅ Recovers from context compaction using session tracker
+- ✅ Can stop/resume for big projects
+
+### Three-Level Tracking
+
+BMad tracks progress at three levels:
+
+**1. Phase Status** (`docs/bmm-workflow-status.yaml`)
+- Official phase tracking (Phase 1-8)
+- Gate pass/fail status
+- Used by `/bmad-status` and `/bmad-gate`
+
+**2. Project Dashboard** (`docs/project-tracker.md`)
+- Epic → Story → Task progress
+- Completion percentages
+- User-facing dashboard (view with `/bmad-track`)
+
+**3. Session Recovery** (`docs/session-tracker.md`)
+- Orchestrator's working memory
+- Issues found and resolved
+- Decisions made with rationale
+- Important context for post-compaction recovery
+- Used by orchestrator to resume after interruption
 
 ### The 13-Agent Team
 
@@ -291,15 +325,20 @@ Implements STORY-002  Implements STORY-004  Implements STORY-007 Implements STOR
 ALL FOUR WORKING IN PARALLEL! →
 ```
 
-**How They Coordinate**:
-1. All read `docs/naming-registry.md` BEFORE starting
-2. Stories have "Depends On" field (enforces execution order)
-3. Database stories have no dependencies (run first)
-4. Backend stories depend on Database
-5. Frontend stories depend on Backend
-6. Mobile stories depend on Backend (parallel with Frontend)
-7. Each task = 1 git commit with SHA recorded in story file
-8. Each completed story = 1 git push
+**How They Coordinate** (Agent Team Features):
+1. **Direct messaging**: Agents use `SendMessage` to coordinate
+   - Database Engineer → Backend: "STORY-001 complete, schema ready"
+   - Backend Developer → Frontend: "Auth API ready at /api/auth/register"
+2. **Shared task list**: All teammates see story dependencies
+3. **Execution order**:
+   - Database stories (no dependencies) run first
+   - Backend waits for Database messages
+   - Frontend/Mobile wait for Backend API completion
+4. **Naming coordination**: Update `naming-registry.md` and notify teammates
+5. **Git workflow**:
+   - Each task = 1 commit with SHA recorded in story file
+   - Each story complete = 1 push + SendMessage to team lead
+6. **Conflict avoidance**: Coordinate via messages before editing shared files
 
 **Output**:
 - `src/` - All web implementation code
