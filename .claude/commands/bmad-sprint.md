@@ -73,33 +73,24 @@ TaskUpdate({ taskId: "3", addBlockedBy: ["2"] })  // STORY-003 needs STORY-002
 Task({
   team_name: "sprint-1",
   name: "frontend-dev",
-  subagent_type: "general-purpose",
-  prompt: `You are the Frontend Developer for Sprint 1.
+  subagent_type: "Frontend Developer",
+  prompt: `You are working on Sprint 1 as part of an Agent Team.
 
-READ FIRST:
-1. .claude/agents/frontend-developer.md — Your role, standards, and GIT WORKFLOW
-2. docs/architecture.md — Project structure and tech stack
-3. docs/ux-wireframes.md — Screen specifications
-4. docs/sprint-plan.md — Your assigned stories (Track: Frontend)
+COORDINATION:
+- Use SendMessage to communicate with backend-dev and db-engineer teammates
+- Check shared task list for story dependencies
+- Notify team when stories complete: SendMessage to lead
 
-GIT WORKFLOW (CRITICAL — follow exactly):
-For EACH task in each story:
-  1. Implement the task
-  2. git add -A && git commit -m "[STORY-NNN] task: <description>"
-  3. Get SHA: git rev-parse --short HEAD
-  4. Update the story file Git Task Tracking table with ✅ and the SHA
-  
-When ALL tasks in a story are done:
-  1. Update story status to "Done"
-  2. git add docs/stories/STORY-NNN.md
-  3. git commit -m "[STORY-NNN] complete: <title>"
-  4. git push origin sprint/sprint-1
-  5. SendMessage to team lead: "STORY-NNN complete and pushed"
+STORIES:
+- Claim Frontend-track stories from docs/stories/
+- Work in dependency order (check blockedBy)
+- Follow all git workflow from your agent file (.claude/agents/frontend-developer.md)
 
-You can also use: ./scripts/bmad-git.sh task-commit STORY-NNN "description" N
-And: ./scripts/bmad-git.sh story-push STORY-NNN "Story Title"
+GIT HELPERS:
+- ./scripts/bmad-git.sh task-commit STORY-NNN "description" N
+- ./scripts/bmad-git.sh story-push STORY-NNN "Story Title"
 
-STORIES: Claim Frontend-track stories from docs/stories/. Work in dependency order.`,
+Your agent file contains full instructions for implementation, git workflow, and naming conventions.`,
   run_in_background: true
 })
 ```
@@ -109,21 +100,25 @@ STORIES: Claim Frontend-track stories from docs/stories/. Work in dependency ord
 Task({
   team_name: "sprint-1",
   name: "backend-dev",
-  subagent_type: "general-purpose",
-  prompt: `You are the Backend Developer for Sprint 1.
+  subagent_type: "Backend Developer",
+  prompt: `You are working on Sprint 1 as part of an Agent Team.
 
-READ FIRST:
-1. .claude/agents/backend-developer.md — Your role, standards, and GIT WORKFLOW
-2. docs/architecture.md — API design, project structure
-3. docs/sprint-plan.md — Your assigned stories (Track: Backend)
+COORDINATION:
+- Use SendMessage to communicate with frontend-dev and db-engineer teammates
+- Wait for db-engineer to complete schema stories before starting API stories
+- Check shared task list for dependencies
+- Notify team when stories complete: SendMessage to lead
 
-GIT WORKFLOW (CRITICAL):
-For EACH task: commit with [STORY-NNN] prefix, record SHA in story file.
-On story completion: push to sprint/sprint-1, notify team lead.
+STORIES:
+- Claim Backend-track stories from docs/stories/
+- Work in dependency order (most Backend stories depend on Database stories)
+- Follow all git workflow from your agent file (.claude/agents/backend-developer.md)
 
-Use helpers: ./scripts/bmad-git.sh task-commit / story-push
+GIT HELPERS:
+- ./scripts/bmad-git.sh task-commit STORY-NNN "description" N
+- ./scripts/bmad-git.sh story-push STORY-NNN "Story Title"
 
-STORIES: Claim Backend-track stories. Check DB stories are done first (your dependency).`,
+Your agent file contains full instructions for implementation, git workflow, and naming conventions.`,
   run_in_background: true
 })
 ```
@@ -133,23 +128,27 @@ STORIES: Claim Backend-track stories. Check DB stories are done first (your depe
 Task({
   team_name: "sprint-1",
   name: "db-engineer",
-  subagent_type: "general-purpose",
-  prompt: `You are the Database Engineer for Sprint 1.
+  subagent_type: "Database Engineer",
+  prompt: `You are working on Sprint 1 as part of an Agent Team.
 
-READ FIRST:
-1. .claude/agents/database-engineer.md — Your role, standards, and GIT WORKFLOW
-2. docs/architecture.md — Data model, entity relationships
-3. docs/sprint-plan.md — Your assigned stories (Track: Database)
+PRIORITY: You are the foundation! Backend and Frontend depend on your schema.
 
-GIT WORKFLOW (CRITICAL):
-For EACH task: commit with [STORY-NNN] prefix, record SHA in story file.
-On story completion: push to sprint/sprint-1, notify team lead.
+COORDINATION:
+- After EACH schema story completes, SendMessage to backend-dev: "STORY-NNN complete, schema ready"
+- Update naming-registry.md with new table/column names (commit with story)
+- Use SendMessage to communicate with backend-dev and frontend-dev teammates
+- Notify team lead when stories complete
 
-PRIORITY: Complete schema stories FIRST — other tracks depend on you!
-Use: ./scripts/bmad-git.sh task-commit / story-push
+STORIES:
+- Claim Database-track stories from docs/stories/
+- Complete schema stories FIRST before moving to queries/migrations
+- Follow all git workflow from your agent file (.claude/agents/database-engineer.md)
 
-After each schema story completes, SendMessage to team lead immediately
-so Backend and Frontend stories can be unblocked.`,
+GIT HELPERS:
+- ./scripts/bmad-git.sh task-commit STORY-NNN "description" N
+- ./scripts/bmad-git.sh story-push STORY-NNN "Story Title"
+
+Your agent file contains full instructions for implementation, git workflow, and naming conventions.`,
   run_in_background: true
 })
 ```

@@ -753,106 +753,87 @@ await Task({
 // Savings: 58k tokens (97% reduction!)
 ```
 
-**Complete Phase 5 Spawn Pattern (Sequential + Parallel):**
+**Complete Phase 5 Spawn Pattern (Agent Team):**
 ```typescript
-// 1. Database Engineer (no dependencies - runs first)
+// Step 0: Setup git sprint branch
+await Bash({
+  command: `git checkout -b sprint/sprint-1 && git add docs/ .claude/ && git commit -m "[SPRINT-1] init: Planning docs" && git push -u origin sprint/sprint-1`,
+  description: "Create sprint branch and commit planning docs"
+});
+
+// Step 1: Create Agent Team
+await TeamCreate({
+  team_name: "sprint-1",
+  description: "Sprint 1 — Coordinated parallel implementation with git tracking"
+});
+
+// Step 2: Spawn teammates (they coordinate via messaging and shared task list)
 await Task({
+  team_name: "sprint-1",
+  name: "db-engineer",
   subagent_type: "Database Engineer",
   description: "Implement database stories",
-  prompt: `Implement Database track stories.
+  prompt: `You are working on Sprint 1 as part of an Agent Team.
 
-**INPUT:**
-- Read: docs/PROJECT-SUMMARY.md (tech stack, naming)
-- Read: docs/naming-registry.md (database naming conventions)
-- Stories to implement: docs/stories/STORY-001.md through STORY-NNN.md (filter by track: Database)
+PRIORITY: You are the foundation! Backend and Frontend depend on your schema.
 
-**OUTPUT:**
-- Write code to: src/database/ (migrations, seeds, models)
-- Write tests to: tests/database/
-- Update stories: Mark tasks complete with commit SHAs
+COORDINATION:
+- After EACH schema story completes, SendMessage to backend-dev: "STORY-NNN complete, schema ready"
+- Update naming-registry.md with new table/column names
+- Notify team lead when all stories complete
 
-**GIT WORKFLOW:**
-- Every task complete → git commit with [STORY-NNN] prefix
-- Record commit SHA in story file
-- All stories complete → git push
-
-**OUTPUT PROTOCOL:**
-After completing all database stories, return ONLY:
-"✅ Database stories complete. Files: [list]. Migrations: [N]. Seeds: [M]. Tests: [P]. All pushed: Yes/No."
-
-DO NOT return full code in your response.`
+STORIES: Claim Database-track stories from docs/stories/
+Your agent file contains full git workflow and implementation instructions.`,
+  run_in_background: true
 });
 
-// 2. Backend Developer (depends on database - runs second)
 await Task({
+  team_name: "sprint-1",
+  name: "backend-dev",
   subagent_type: "Backend Developer",
   description: "Implement backend stories",
-  prompt: `Implement Backend track stories.
+  prompt: `You are working on Sprint 1 as part of an Agent Team.
 
-**INPUT:**
-- Read: docs/PROJECT-SUMMARY.md
-- Read: docs/naming-registry.md (API naming conventions)
-- Stories to implement: docs/stories/STORY-*.md (filter by track: Backend)
-- Database schema: src/database/ (created by Database Engineer)
+COORDINATION:
+- Wait for db-engineer messages about completed schema stories before starting dependent API stories
+- SendMessage to frontend-dev when API endpoints are ready
+- Check shared task list for dependencies
+- Notify team lead when all stories complete
 
-**OUTPUT:**
-- Write code to: src/api/ or src/backend/
-- Write tests to: tests/api/ or tests/backend/
-- Update stories: Mark tasks complete with commit SHAs
-
-**GIT WORKFLOW:**
-- Every task complete → git commit with [STORY-NNN] prefix
-- Record commit SHA in story file
-- All stories complete → git push
-
-**OUTPUT PROTOCOL:**
-After completing all backend stories, return ONLY:
-"✅ Backend stories complete. Files: [list]. Endpoints: [N]. Tests: [M]. All pushed: Yes/No."
-
-DO NOT return full code in your response.`
+STORIES: Claim Backend-track stories from docs/stories/
+Your agent file contains full git workflow and implementation instructions.`,
+  run_in_background: true
 });
 
-// 3. Frontend + Mobile in parallel (both depend on backend API)
-await Promise.all([
-  Task({
-    subagent_type: "Frontend Developer",
-    description: "Implement frontend stories",
-    prompt: `Implement Frontend track stories.
+await Task({
+  team_name: "sprint-1",
+  name: "frontend-dev",
+  subagent_type: "Frontend Developer",
+  description: "Implement frontend stories",
+  prompt: `You are working on Sprint 1 as part of an Agent Team.
 
-**INPUT:**
-- Read: docs/PROJECT-SUMMARY.md
-- Read: docs/naming-registry.md (component naming conventions)
-- Read: docs/ux-wireframes.md (UI specifications)
-- Stories to implement: docs/stories/STORY-*.md (filter by track: Frontend)
-- Backend API: src/api/ (created by Backend Developer)
+COORDINATION:
+- Wait for backend-dev messages about completed API endpoints before starting dependent UI stories
+- SendMessage to backend-dev if you need API changes
+- Check shared task list for dependencies
+- Notify team lead when all stories complete
 
-**OUTPUT:**
-- Write code to: src/components/, src/pages/, src/app/
-- Write tests to: tests/frontend/
-- Update stories: Mark tasks complete with commit SHAs
+STORIES: Claim Frontend-track stories from docs/stories/
+Your agent file contains full git workflow and implementation instructions.`,
+  run_in_background: true
+});
 
-**GIT WORKFLOW:**
-- Every task complete → git commit with [STORY-NNN] prefix
-- Record commit SHA in story file
-- All stories complete → git push
-
-**OUTPUT PROTOCOL:**
-After completing all frontend stories, return ONLY:
-"✅ Frontend stories complete. Files: [list]. Components: [N]. Pages: [M]. Tests: [P]. All pushed: Yes/No."
-
-DO NOT return full code in your response.`
-  }),
-
-  Task({
-    subagent_type: "Mobile Developer",
-    description: "Implement mobile stories",
-    prompt: `Implement Mobile track stories.
-
-**INPUT:**
-- Read: docs/PROJECT-SUMMARY.md
-- Read: docs/naming-registry.md (mobile naming conventions)
-- Read: docs/ux-wireframes.md (mobile UI specifications)
-- Stories to implement: docs/stories/STORY-*.md (filter by track: Mobile)
+// Mobile developer (optional, only if mobile stories exist)
+// await Task({
+//   team_name: "sprint-1",
+//   name: "mobile-dev",
+//   subagent_type: "Mobile Developer",
+//   description: "Implement mobile stories",
+//   prompt: `You are working on Sprint 1 as part of an Agent Team.
+//   COORDINATION: Wait for backend-dev API completion. SendMessage for updates.
+//   STORIES: Claim Mobile-track stories from docs/stories/`,
+//   run_in_background: true
+// });
 - Backend API: src/api/ (created by Backend Developer)
 
 **OUTPUT:**
