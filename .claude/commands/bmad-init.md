@@ -22,65 +22,135 @@ git init 2>/dev/null || true
 echo "node_modules/" >> .gitignore 2>/dev/null || true
 echo ".env" >> .gitignore 2>/dev/null || true
 
-# Create session tracker
+# Create BMad workflow status (YAML - phase tracking)
+cat > docs/bmm-workflow-status.yaml << 'EOF'
+project:
+  name: ""
+  level: 2  # Enterprise level (full workflow)
+  initialized: true
+
+phases:
+  discovery:
+    status: pending  # pending | in_progress | complete | failed
+    agent: analyst
+    output: docs/product-brief.md
+    gate_passed: false
+
+  planning:
+    status: pending
+    agents: [product-manager, ux-designer]
+    outputs: [docs/prd.md, docs/ux-wireframes.md]
+    gate_passed: false
+
+  architecture:
+    status: pending
+    agent: architect
+    outputs: [docs/architecture.md, docs/adrs/]
+    gate_score: 0
+    gate_passed: false  # Requires >= 90/100
+
+  sprint_planning:
+    status: pending
+    agent: scrum-master
+    outputs: [docs/sprint-plan.md, docs/epics/]
+    gate_passed: false
+
+  story_creation:
+    status: pending
+    agents: [story-writer]  # Parallel (1 per epic)
+    outputs: [docs/stories/]
+    gate_passed: false
+
+  implementation:
+    status: pending
+    agents: [frontend-developer, backend-developer, database-engineer]
+    mode: agent-team  # Uses Agent Team coordination
+    tracks:
+      frontend: { stories: [], status: pending }
+      backend: { stories: [], status: pending }
+      database: { stories: [], status: pending }
+    gate_passed: false
+
+  quality_assurance:
+    status: pending
+    agent: qa-engineer
+    output: docs/test-plan.md
+    gate_passed: false
+
+  deployment:
+    status: pending
+    agent: devops-engineer
+    output: docs/deploy-config.md
+    gate_passed: false
+
+  final_review:
+    status: pending
+    agent: tech-lead
+    output: docs/review-checklist.md
+    verdict: null  # ship | ship_with_notes | do_not_ship
+EOF
+
+# Create orchestrator session tracker (for recovery)
 cat > docs/session-tracker.md << 'EOF'
-# BMad Session Tracker
+# BMad Orchestrator Session Tracker
 
-**Project**: [To be determined]
-**Started**: $(date -u +"%Y-%m-%d %H:%M UTC")
-**Last Updated**: $(date -u +"%Y-%m-%d %H:%M UTC")
+**Purpose**: Track orchestrator session state for context compaction recovery
 
-## Current State
+**Session Started**: [Timestamp will be set by orchestrator]
+**Last Updated**: [Timestamp]
 
-**Phase**: Phase 1: Discovery
-**Status**: Not Started
-**Next Action**: Spawn BMad Orchestrator to begin workflow
+## Current Orchestrator State
 
-## Phase Progress
+**Current Phase**: Not started
+**Sub-phase/Action**: Waiting for /bmad-init to spawn orchestrator
+**Status**: Idle
 
-- [ ] Phase 1: Discovery (Business Analyst)
-- [ ] Phase 2: Planning (PM + UX Designer parallel)
-- [ ] Phase 3: Architecture (System Architect)
-- [ ] Phase 4: Epic Creation (Scrum Master)
-- [ ] Phase 4b: Story Creation (Story Writers parallel)
-- [ ] Phase 5: Implementation (Agent Team: DB, Backend, Frontend)
-- [ ] Phase 6: Quality Assurance (QA Engineer)
-- [ ] Phase 7: Deployment (DevOps Engineer)
-- [ ] Phase 8: Final Review (Tech Lead)
+## Active Agent Spawns
 
-## Artifacts Created
-
-- `docs/product-brief.md` - [❌ Missing]
-- `docs/prd.md` - [❌ Missing]
-- `docs/ux-wireframes.md` - [❌ Missing]
-- `docs/architecture.md` - [❌ Missing]
-- `docs/epics/` - [❌ Missing]
-- `docs/stories/` - [❌ Missing]
-- `docs/test-plan.md` - [❌ Missing]
-- `docs/deploy-config.md` - [❌ Missing]
-- `docs/review-checklist.md` - [❌ Missing]
-
-## Active Background Tasks
-
-| Task ID | Agent | Phase | Started | Status |
-|---------|-------|-------|---------|--------|
+| Agent ID | Agent Type | Phase | Spawn Time | Status |
+|----------|------------|-------|------------|--------|
 | — | — | — | — | — |
+
+## Background Tasks (Agent Team)
+
+| Task ID | Agent Name | Story | Started | Last Update | Status |
+|---------|-----------|--------|---------|-------------|--------|
+| — | — | — | — | — | — |
+
+## Context Recovery Information
+
+**Compaction Events**: 0
+**Last Compaction**: Never
+**Recovery Notes**: [Empty]
+
+## Next Action Queue
+
+1. [Action that orchestrator should take next]
+
+## Session Variables
+
+- **Sprint Branch**: [Not created]
+- **Team Name**: [Not created]
+- **Stories Assigned**: [0]
 
 ## Blockers and Issues
 
 [None]
 
-## Context Compaction Events
-
-**Count**: 0 times compacted
-**Last Compaction**: Never
+---
+**Note**: This file is used by the BMad Orchestrator for session recovery.
+For project progress, see: `docs/project-tracker.md`
+For phase status, see: `docs/bmm-workflow-status.yaml`
 EOF
 
-# Remove old workflow status if exists
-rm -f docs/bmm-workflow-status.yaml
-
 echo "✅ Project structure created"
+echo "✅ Phase tracking initialized: docs/bmm-workflow-status.yaml"
 echo "✅ Session tracker initialized: docs/session-tracker.md"
+echo ""
+echo "Three-level tracking:"
+echo "  1. docs/bmm-workflow-status.yaml — Phase gates (used by /bmad-status, /bmad-gate)"
+echo "  2. docs/project-tracker.md — Epic/Story dashboard (created by /bmad-track)"
+echo "  3. docs/session-tracker.md — Orchestrator session state (for recovery)"
 ```
 
 ## Step 2: Spawn BMad Orchestrator
