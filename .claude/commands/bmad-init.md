@@ -94,7 +94,7 @@ EOF
 cat > docs/session-tracker.md << 'EOF'
 # BMad Orchestrator Session Tracker
 
-**Purpose**: Track orchestrator session state for context compaction recovery
+**Purpose**: Orchestrator working memory for context compaction recovery
 
 **Session Started**: [Timestamp will be set by orchestrator]
 **Last Updated**: [Timestamp]
@@ -117,30 +117,79 @@ cat > docs/session-tracker.md << 'EOF'
 |---------|-----------|--------|---------|-------------|--------|
 | — | — | — | — | — | — |
 
-## Context Recovery Information
+## Issues and Resolutions
 
-**Compaction Events**: 0
-**Last Compaction**: Never
-**Recovery Notes**: [Empty]
+### Issue Log
+| # | Timestamp | Phase | Issue | Resolution | Status |
+|---|-----------|-------|-------|------------|--------|
+| — | — | — | — | — | — |
+
+**Example entries:**
+- `#1 | 2026-02-21 15:30 | Phase 3 | Architect gate score 85/100 (below 90) | Re-spawned architect with feedback: "Add more details to API design section" | Resolved - Score: 92/100`
+- `#2 | 2026-02-21 16:45 | Phase 5 | Frontend dev: naming-registry.md conflict with backend | Coordinated via SendMessage, backend updated first, frontend pulled changes | Resolved`
+
+## Decisions Made
+
+### Decision Log
+| # | Timestamp | Phase | Decision | Rationale | Outcome |
+|---|-----------|-------|----------|-----------|---------|
+| — | — | — | — | — | — |
+
+**Example entries:**
+- `#1 | 2026-02-21 14:00 | Phase 4 | Created 3 epics instead of 5 | User stories were similar, grouped by user journey | Sprint plan: 3 epics, 12 stories`
+- `#2 | 2026-02-21 17:00 | Phase 5 | Used Agent Team (not sequential) | 12 stories with dependencies, coordination needed | Saved ~40 minutes`
+
+## Important Context
+
+### Context Notes (for post-compaction recovery)
+- [Critical information orchestrator needs to remember]
+- [User preferences mentioned during session]
+- [Deviations from standard workflow]
+- [Special requirements or constraints]
+
+**Example entries:**
+- `User emphasized: "Must support mobile devices first, desktop is secondary"`
+- `Database: Using PostgreSQL 15+ for JSONB features (mentioned in Phase 1)`
+- `Skipped Phase 7 (DevOps) - user will deploy manually to existing infrastructure`
 
 ## Next Action Queue
 
 1. [Action that orchestrator should take next]
+2. [Following action if automatic mode]
 
 ## Session Variables
 
 - **Sprint Branch**: [Not created]
 - **Team Name**: [Not created]
 - **Stories Assigned**: [0]
+- **User Availability**: [Full-time | Part-time | Async]
+- **Target Deadline**: [None | Date]
 
-## Blockers and Issues
+## Blockers and Issues (Current)
 
-[None]
+**Active Blockers:**
+- [None | Description of blocker and what's needed to unblock]
+
+**Waiting On:**
+- [User approval | Agent completion | External dependency]
+
+## Context Recovery Information
+
+**Compaction Events**: 0
+**Last Compaction**: Never
+
+**Recovery Checklist (post-compaction):**
+- [ ] Read this session-tracker.md
+- [ ] Check bmm-workflow-status.yaml for phase status
+- [ ] Check for active background tasks
+- [ ] Review recent issues and decisions
+- [ ] Read important context notes
+- [ ] Resume from "Next Action Queue"
 
 ---
-**Note**: This file is used by the BMad Orchestrator for session recovery.
-For project progress, see: `docs/project-tracker.md`
-For phase status, see: `docs/bmm-workflow-status.yaml`
+**Note**: This is the orchestrator's working memory.
+- **For project progress**: See `docs/project-tracker.md`
+- **For phase status**: See `docs/bmm-workflow-status.yaml`
 EOF
 
 echo "✅ Project structure created"
