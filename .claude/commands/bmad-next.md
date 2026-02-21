@@ -1,159 +1,158 @@
-# /bmad-next — Advance to Next Phase
+# /bmad-next — Resume or Advance Workflow
 
-Automatically determine the current phase and advance by spawning appropriate agent(s).
+Spawns the BMad Orchestrator to resume the workflow from where it left off or advance to the next phase.
 
-**IMPORTANT:** Use the spawn patterns from `.claude/agents/orchestrator.md` which include OUTPUT PROTOCOL.
+## What This Command Does
 
-## Phase Detection Logic
+1. **Spawns BMad Orchestrator** in resume mode
+2. **Orchestrator reads** `docs/session-tracker.md`
+3. **Orchestrator determines** current phase and status
+4. **Orchestrator decides** next action:
+   - Resume incomplete phase
+   - Advance to next phase
+   - Complete the project
 
-```
-IF docs/product-brief.md does NOT exist:
-  → Phase 1: Spawn Business Analyst
-  → Use orchestrator.md Phase 1 spawn pattern (includes OUTPUT PROTOCOL)
-
-ELSE IF docs/prd.md OR docs/ux-wireframes.md does NOT exist:
-  → Phase 2: Spawn Product Manager + UX Designer (parallel)
-  → Use orchestrator.md Phase 2 spawn pattern (includes OUTPUT PROTOCOL)
-
-ELSE IF docs/architecture.md does NOT exist:
-  → Phase 3: Spawn System Architect
-  → Use orchestrator.md Phase 3 spawn pattern (includes OUTPUT PROTOCOL)
-  → Must pass 90% Solutioning Gate before proceeding
-
-ELSE IF docs/epics/ is empty (no EPIC-*.md files):
-  → Phase 4: Spawn Scrum Master (single subagent)
-  → Creates Epics + Sprint Plan
-  → Does NOT create stories (that's Phase 4b)
-
-ELSE IF docs/stories/ is empty (no STORY-*.md files):
-  → Phase 4b: PARALLEL Story Creation
-  → Spawn one story-writer subagent PER epic file
-  → Each writer creates stories for its assigned epic
-  → Story numbering uses epic-based ranges to avoid conflicts
-
-ELSE IF any story file does NOT have "[x] Done" status:
-  → Phase 5: Create Agent Team with 3 developers
-  → Set up sprint git branch first
-  → IMPORTANT: Ask user approval (expensive phase)
-
-ELSE IF docs/test-plan.md does NOT exist:
-  → Phase 6: Spawn QA Engineer
-
-ELSE IF docs/deploy-config.md does NOT exist:
-  → Phase 7: Spawn DevOps Engineer
-
-ELSE IF docs/review-checklist.md does NOT exist:
-  → Phase 8: Spawn Tech Lead
-
-ELSE:
-  → All phases complete! Show final verdict.
-```
-
-## Phase 4b: Parallel Story Creation (Detail)
-
-This is the key new phase. After the Scrum Master creates epics:
+## Architecture
 
 ```
-# Count epic files
-EPIC_COUNT=$(ls docs/epics/EPIC-*.md 2>/dev/null | wc -l)
-
-echo "Found $EPIC_COUNT epics. Spawning $EPIC_COUNT parallel story writers..."
-
-# For EPIC-001:
-Task({
-  name: "story-writer-epic-001",
-  prompt: `You are a Story Writer. Your ONLY job: create stories for EPIC-001.
-
-READ FIRST:
-1. .claude/agents/scrum-master.md — Story format, rules, and Git Task Tracking section
-2. docs/epics/EPIC-001.md — This epic's scope, ACs, and track guidance
-3. docs/architecture.md — Technical approach
-4. docs/prd.md — Feature acceptance criteria
-
-CREATE stories in docs/stories/ using the number range from the epic file.
-EVERY story MUST include:
-- Metadata (points, track, epic, dependencies)
-- User Story (As a... I want... so that...)
-- Acceptance Criteria (3+ testable criteria)
-- Tasks (individual committable units of work)
-- Git Task Tracking table (with task rows, status ⬜, SHA placeholder)
-- Story Git Summary section
-- Status checkboxes including "Pushed"
-
-Use templates/story.md as reference for the exact format.`,
-  subagent_type: "general-purpose",
-  run_in_background: true
-})
-
-# For EPIC-002:
-Task({
-  name: "story-writer-epic-002",
-  prompt: `...same but for EPIC-002...`,
-  subagent_type: "general-purpose",
-  run_in_background: true
-})
-
-# Repeat for each epic...
+User: /bmad-next
+   ↓
+Spawn: BMad Orchestrator (resume mode)
+   ↓
+Orchestrator reads: docs/session-tracker.md
+   ↓
+Orchestrator detects:
+   - Current phase
+   - What's complete
+   - What's next
+   - Any blockers
+   ↓
+Orchestrator executes:
+   - Resume Phase N (if incomplete)
+   - OR Advance to Phase N+1 (if complete)
 ```
 
-After all story writers complete, run the Phase 4b gate:
-- All stories have ACs, points, track, dependencies
-- All stories have Git Task Tracking section
-- Story numbers don't overlap between epics
-- Cross-epic dependencies are mapped
+## Execution
 
-## Phase Spawn Patterns (Use These!)
-
-### Phase 1 Spawn:
 ```typescript
-await Task({
-  subagent_type: "Business Analyst",
-  description: "Create Product Brief",
-  prompt: `Create Product Brief.
-INPUT: Read user's project description
-OUTPUT: Write to docs/product-brief.md
-OUTPUT PROTOCOL: Return ONLY "✅ Product Brief created. File: docs/product-brief.md."
-DO NOT return full content.`
+Task({
+  subagent_type: "BMad Orchestrator",
+  description: "Resume or advance BMad workflow",
+  model: "opus",
+  prompt: `Resume the BMad workflow.
+
+RECOVERY PROTOCOL:
+1. Read docs/session-tracker.md to determine:
+   - Current phase
+   - What artifacts exist
+   - What's incomplete
+   - Next action
+   - Any blockers
+
+2. Check for context compaction:
+   - If "Context Compaction Events" > 0, use Post-Compaction Recovery
+   - Read your agent file for full recovery protocol
+
+3. Determine next action:
+   - If current phase incomplete → Resume current phase
+   - If current phase complete → Advance to next phase
+   - If all phases complete → Show final verdict
+
+4. Execute using spawn patterns from your agent file
+
+5. Update session-tracker.md with progress
+
+CONTEXT:
+- You are the BMad Orchestrator
+- Your complete role is in .claude/agents/orchestrator.md
+- All spawn patterns are in your agent file
+- Use token optimization strategies
+- Update session tracker after each phase
+
+Begin by reading session-tracker.md and determining next action.`
 });
 ```
 
-### Phase 2 Spawn (Parallel):
-```typescript
-await Promise.all([
-  Task({
-    subagent_type: "Product Manager",
-    description: "Create PRD",
-    prompt: `Create PRD.
-INPUT: Read docs/product-brief.md
-OUTPUT: Write to docs/prd.md
-OUTPUT PROTOCOL: Return ONLY "✅ PRD created. File: docs/prd.md. Features: [N]."
-DO NOT return full content.`
-  }),
-  Task({
-    subagent_type: "UX Designer",
-    description: "Create UX wireframes",
-    prompt: `Create UX wireframes.
-INPUT: Read docs/product-brief.md
-OUTPUT: Write to docs/ux-wireframes.md
-OUTPUT PROTOCOL: Return ONLY "✅ UX wireframes created. File: docs/ux-wireframes.md. Screens: [N]."
-DO NOT return full content.`
-  })
-]);
+## What Orchestrator Does
+
+The orchestrator will:
+
+1. **Read session-tracker.md** to see current state
+2. **Determine phase** based on artifacts:
+   - No product-brief.md? → Phase 1
+   - No prd.md or ux-wireframes.md? → Phase 2
+   - No architecture.md? → Phase 3
+   - No epics? → Phase 4
+   - No stories? → Phase 4b
+   - Stories not done? → Phase 5
+   - No test-plan.md? → Phase 6
+   - No deploy-config.md? → Phase 7
+   - No review-checklist.md? → Phase 8
+   - All complete? → Show final verdict
+
+3. **Execute appropriate spawn pattern:**
+   - Phase 1: Spawn Business Analyst
+   - Phase 2: Spawn PM + UX (parallel)
+   - Phase 3: Spawn Architect
+   - Phase 4: Spawn Scrum Master
+   - Phase 4b: Spawn Story Writers (parallel, 1 per epic)
+   - Phase 5: Create Agent Team (DB + Backend + Frontend)
+   - Phase 6: Spawn QA Engineer
+   - Phase 7: Spawn DevOps Engineer
+   - Phase 8: Spawn Tech Lead
+
+4. **Update session-tracker.md** after phase completes
+
+5. **Continue automatically** to next phase OR wait for user
+
+## Use Cases
+
+### Resume After Stop
+```
+User stopped during Phase 3
+User: /bmad-next
+
+Orchestrator: Reading session-tracker.md...
+              Phase 3 (Architecture) was in progress.
+              Resuming Phase 3...
+              [Spawns Architect to complete architecture.md]
 ```
 
-**For other phases:** See `.claude/agents/orchestrator.md` for complete spawn patterns with OUTPUT PROTOCOL.
+### Advance to Next Phase
+```
+User manually ran Phase 1, now wants Phase 2
+User: /bmad-next
 
-## User Approval Checkpoints
+Orchestrator: Reading session-tracker.md...
+              Phase 1 complete (product-brief.md exists)
+              Advancing to Phase 2...
+              [Spawns PM + UX in parallel]
+```
 
-Ask for confirmation before:
-- **Phase 3** → "PRD and UX spec ready. Proceed to Architecture?"
-- **Phase 4b** → "Scrum Master created [N] epics. Spawn [N] parallel story writers?"
-- **Phase 5** → "Sprint has [N] stories across [N] epics. Spawn 3 developers + git branch?"
-- **Phase 8** → "QA and deployment ready. Proceed to final review?"
+### Resume After Context Compaction
+```
+Session was compacted during Phase 5
+User: /bmad-next
 
-## After Each Phase
+Orchestrator: Reading session-tracker.md...
+              Context compaction detected (2 events)
+              Using Post-Compaction Recovery Protocol...
+              Phase 5 in progress (Agent Team running)
+              Checking active tasks: db-engineer, backend-dev, frontend-dev
+              [Checks task outputs and resumes coordination]
+```
 
-1. Run `/bmad-gate` to verify phase output quality
-2. Update `docs/project-tracker.md` via `/bmad-track`
-3. If gate fails → re-spawn the agent with specific feedback
-4. If gate passes → show the user what was produced and suggest next phase
+## Benefits
+
+✅ **Single command** - User doesn't need to know which phase they're on
+✅ **Orchestrator decides** - All intelligence in orchestrator, not command
+✅ **Resumable** - Can stop/start for big projects
+✅ **Recoverable** - Handles context compaction automatically
+✅ **No duplication** - Command delegates to orchestrator
+
+## Monitoring
+
+While orchestrator runs:
+- `/bmad-status` - Show current phase
+- `/bmad-track` - Show epic/story progress
+- `docs/session-tracker.md` - Live tracker
