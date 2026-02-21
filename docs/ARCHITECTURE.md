@@ -7,6 +7,71 @@ BMad uses a **Hybrid Orchestrator-Driven** architecture where:
 2. **Can stop/resume**: For big projects or interruptions
 3. **Orchestrator decides**: Parallel vs sequential vs Agent Teams
 4. **Single source of truth**: All workflow logic in orchestrator
+5. **Three-level tracking**: Phase status, project progress, session recovery
+
+## Three-Level Tracking System
+
+BMad uses three separate tracking files, each with a distinct purpose:
+
+### 1. Phase Status (YAML)
+**File**: `docs/bmm-workflow-status.yaml`
+```yaml
+phases:
+  discovery:
+    status: complete
+    agent: analyst
+    output: docs/product-brief.md
+    gate_passed: true
+```
+- **Format**: YAML (structured, parseable by tools)
+- **Tracks**: Official phase status (Phase 1-8), gates, agent assignments
+- **Updated by**: Orchestrator after each phase completes
+- **Used by**: `/bmad-status` command, `/bmad-gate` validation
+- **Purpose**: Formal project phase tracking
+
+### 2. Project Dashboard (Markdown)
+**File**: `docs/project-tracker.md`
+```markdown
+EPIC-001: User Authentication
+  ├─ STORY-001: DB Schema ✅ Done (4/4 tasks, pushed)
+  ├─ STORY-002: Auth API 🔄 Active (3/5 tasks)
+  └─ STORY-003: Login UI ⬜ Pending
+Progress: 7/13 tasks (54%)
+```
+- **Format**: Markdown tables (human-readable)
+- **Tracks**: Epics, Stories, Tasks, progress percentages
+- **Updated by**: `/bmad-track` command
+- **Used by**: User to monitor detailed progress
+- **Purpose**: User-facing project dashboard
+
+### 3. Session Recovery (Markdown)
+**File**: `docs/session-tracker.md`
+```markdown
+## Issues and Resolutions
+#1 | Phase 3 | Architect gate 85/100 → Re-spawned with feedback → 92/100
+
+## Decisions Made
+#1 | Phase 5 | Used Agent Team (not sequential) → Dependencies → Saved 40min
+
+## Important Context
+- User: "Mobile-first, desktop secondary"
+- Database: PostgreSQL 15+ for JSONB features
+
+## Next Action Queue
+1. Wait for backend-dev to complete STORY-002
+2. Notify frontend-dev when API ready
+```
+- **Format**: Markdown (orchestrator working memory)
+- **Tracks**: Issues found, decisions made, important context, next actions
+- **Updated by**: Orchestrator during execution
+- **Used by**: Orchestrator for post-compaction recovery
+- **Purpose**: Orchestrator's working memory for context recovery
+
+**Why three files?**
+- **Separation of concerns**: Each file serves a distinct purpose
+- **Different consumers**: Commands, users, and orchestrator
+- **Recovery support**: session-tracker.md enables post-compaction recovery
+- **Clarity**: No confusion about which file tracks what
 
 ## Core Principles
 
@@ -94,61 +159,83 @@ from your agent file.`
 2. Sees: "Phase: Phase 5, Status: In Progress, Next Action: Continue Agent Team"
 3. Resumes Phase 5 Agent Team or advances to Phase 6
 
-### 4. Session Tracker Format
+### 4. Enhanced Session Tracker
 
-**docs/session-tracker.md** (created by /bmad-init):
+**docs/session-tracker.md** is the orchestrator's **working memory**:
+
 ```markdown
-# BMad Session Tracker
+# BMad Orchestrator Session Tracker
 
-**Project**: [Project Name]
-**Started**: 2026-02-21
-**Last Updated**: 2026-02-21 18:30 UTC
+## Current Orchestrator State
 
-## Current State
+**Current Phase**: Phase 5: Implementation
+**Sub-phase/Action**: Coordinating Agent Team (backend-dev on STORY-002)
+**Status**: Active
 
-**Phase**: Phase 5: Implementation
-**Status**: In Progress
-**Next Action**: Monitor Agent Team progress (db-engineer, backend-dev, frontend-dev)
+## Active Agent Spawns
 
-## Phase Progress
+| Agent ID | Agent Type | Phase | Status |
+|----------|------------|-------|--------|
+| orch_001 | BMad Orchestrator | All | Running |
+| task_db123 | Database Engineer | Phase 5 | Complete ✅ |
+| task_be456 | Backend Developer | Phase 5 | Running ⏳ |
+| task_fe789 | Frontend Developer | Phase 5 | Waiting |
 
-- [x] Phase 1: Discovery (Business Analyst)
-- [x] Phase 2: Planning (PM + UX parallel)
-- [x] Phase 3: Architecture (System Architect)
-- [x] Phase 4: Epics (Scrum Master)
-- [x] Phase 4b: Stories (Story Writers parallel)
-- [ ] Phase 5: Implementation (Agent Team: DB, Backend, Frontend)
-- [ ] Phase 6: QA
-- [ ] Phase 7: Deployment
-- [ ] Phase 8: Final Review
+## Issues and Resolutions
 
-## Artifacts Created
+| # | Timestamp | Phase | Issue | Resolution | Status |
+|---|-----------|-------|-------|------------|--------|
+| 1 | 2026-02-21 15:30 | Phase 3 | Architect gate 85/100 (below 90) | Re-spawned with feedback: "Add API design details" | Resolved - 92/100 |
+| 2 | 2026-02-21 17:15 | Phase 5 | naming-registry.md conflict | Coordinated via SendMessage, backend updated first | Resolved |
 
-- `docs/product-brief.md` - [✅ Exists]
-- `docs/prd.md` - [✅ Exists]
-- `docs/ux-wireframes.md` - [✅ Exists]
-- `docs/architecture.md` - [✅ Exists]
-- `docs/epics/` - [✅ 3 epics]
-- `docs/stories/` - [✅ 12 stories]
-- `src/` - [🔄 In Progress]
+## Decisions Made
 
-## Active Background Tasks
+| # | Timestamp | Phase | Decision | Rationale | Outcome |
+|---|-----------|-------|----------|-----------|---------|
+| 1 | 2026-02-21 14:00 | Phase 4 | Created 3 epics (not 5) | User stories similar, grouped by journey | 3 epics, 12 stories |
+| 2 | 2026-02-21 17:00 | Phase 5 | Used Agent Team | 12 stories with dependencies | Saved ~40 minutes |
 
-| Task ID | Agent | Phase | Started | Status |
-|---------|-------|-------|---------|--------|
-| task_db123 | Database Engineer | Phase 5 | 18:15 UTC | Running ⏳ |
-| task_be456 | Backend Developer | Phase 5 | 18:15 UTC | Running ⏳ |
-| task_fe789 | Frontend Developer | Phase 5 | 18:15 UTC | Running ⏳ |
+## Important Context
 
-## Blockers and Issues
+**User Preferences:**
+- "Mobile-first, desktop is secondary priority"
+- Prefer TypeScript over JavaScript
+- Using existing PostgreSQL 15 database
 
-[None | List any blockers]
+**Technical Constraints:**
+- Must support PostgreSQL 15+ for JSONB features
+- No Docker - deploying to existing server
+- Skipped Phase 7 (DevOps) - manual deployment
+
+**Workflow Deviations:**
+- Combined EPIC-002 and EPIC-003 into single epic (similar features)
+
+## Next Action Queue
+
+1. Wait for backend-dev to complete STORY-002 task 4/5
+2. SendMessage to frontend-dev when API endpoints ready
+3. Continue monitoring Agent Team progress
+4. Advance to Phase 6 when all 12 stories marked "Done"
 
 ## Context Compaction Events
 
-**Count**: 0 times compacted
-**Last Compaction**: [Never | YYYY-MM-DD HH:MM]
+**Count**: 2 times compacted
+**Last Compaction**: 2026-02-21 18:45 UTC
+
+**Recovery Checklist:**
+- [x] Read session-tracker.md
+- [x] Check bmm-workflow-status.yaml (Phase 5: in_progress)
+- [x] Review issues (#2: naming conflict resolved)
+- [x] Review decisions (#2: Agent Team approach)
+- [x] Read important context (mobile-first, PostgreSQL)
+- [x] Resume from Next Action Queue
 ```
+
+**Key Features:**
+- **Issues Log**: Problems encountered and how resolved
+- **Decisions Log**: Key decisions, rationale, outcomes
+- **Important Context**: User preferences, constraints, deviations
+- **Recovery Checklist**: Step-by-step post-compaction recovery
 
 ### 5. Command Responsibilities
 
