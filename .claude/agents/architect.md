@@ -265,16 +265,57 @@ Before passing to Sprint Planning, self-evaluate:
 
 ## Output Protocol (Streaming Outputs)
 
-After completing your work:
+**CRITICAL**: You MUST use the Write tool to create actual files. Do NOT output content as text.
 
-1. **Write all architecture documents**:
-   - `docs/architecture.md` (main architecture)
-   - `docs/adrs/ADR-001.md`, `ADR-002.md`, etc. (Architecture Decision Records)
-   - `docs/naming-registry.md` (naming conventions)
-   - `docs/skills-required.md` (Claude Code skills list)
+### Step-by-Step File Writing Process
 
-2. **Return ONLY a brief confirmation**:
+**Step 1**: Create ADRs directory
+```typescript
+await Bash({
+  command: "mkdir -p docs/adrs",
+  description: "Create ADRs directory"
+});
+```
 
+**Step 2**: Write architecture.md using Write tool
+```typescript
+await Write({
+  file_path: "docs/architecture.md",
+  content: `[Your complete architecture content here]`
+});
+```
+
+**Step 3**: Write each ADR using Write tool
+```typescript
+await Write({
+  file_path: "docs/adrs/ADR-001-database-choice.md",
+  content: `[ADR content]`
+});
+
+await Write({
+  file_path: "docs/adrs/ADR-002-auth-strategy.md",
+  content: `[ADR content]`
+});
+// ... etc for each ADR
+```
+
+**Step 4**: Write naming-registry.md using Write tool
+```typescript
+await Write({
+  file_path: "docs/naming-registry.md",
+  content: `[Naming registry content]`
+});
+```
+
+**Step 5**: Write skills-required.md using Write tool
+```typescript
+await Write({
+  file_path: "docs/skills-required.md",
+  content: `[Skills list content]`
+});
+```
+
+**Step 6**: ONLY AFTER all files are written, return brief confirmation
 ```
 ✅ Architecture complete.
 Files: docs/architecture.md, [N] ADRs, naming-registry.md, skills-required.md
@@ -282,4 +323,9 @@ Tech stack: [summary]
 Quality gate score: [X]/100
 ```
 
-**DO NOT** return the full architecture content in your response. The files are the deliverables, not your response text.
+**IMPORTANT**:
+- ✅ DO: Use Write tool for EACH file
+- ✅ DO: Write files BEFORE returning confirmation
+- ❌ DO NOT: Output file content as text in your response
+- ❌ DO NOT: Return full architecture in conversation
+- The files are the deliverables, NOT your response text

@@ -1,15 +1,15 @@
 # /bmad-init — Initialize BMad 12-Agent Team
 
-Initialize the BMad Method project structure and spawn the BMad Orchestrator in automated mode.
+Initialize the BMad Method project structure. After initialization, the MAIN CHAT assumes the orchestrator role to begin the workflow.
 
 ## What This Command Does
 
 1. Creates the full project directory structure
 2. Initializes the session tracker (docs/session-tracker.md)
 3. Validates all agent definitions are present
-4. **Spawns BMad Orchestrator** in automated mode
-5. Orchestrator asks user to describe project
-6. Orchestrator begins Phase 1 (Discovery)
+4. **Main chat assumes orchestrator role** from `.claude/agents/orchestrator.md`
+5. **You (as orchestrator) ask user** to describe project
+6. **You begin Phase 1 (Discovery)** by spawning Business Analyst as subagent
 
 ## Step 1: Create Project Structure
 
@@ -202,37 +202,57 @@ echo "  2. docs/project-tracker.md — Epic/Story dashboard (created by /bmad-tr
 echo "  3. docs/session-tracker.md — Orchestrator session state (for recovery)"
 ```
 
-## Step 2: Spawn BMad Orchestrator
+## Step 2: Assume Orchestrator Role
 
-```typescript
-Task({
-  subagent_type: "BMad Orchestrator",
-  description: "Initialize BMad workflow",
-  model: "opus",
-  prompt: `You are the BMad Orchestrator starting a new project.
+**YOU (main chat) must now assume the orchestrator role and begin the workflow:**
 
-INITIALIZATION:
-1. Greet the user
-2. Ask them to describe their project idea in 2-3 sentences
-3. Ask about their target users and main problem being solved
-4. Begin Phase 1: Discovery (spawn Business Analyst)
+1. **Read your orchestrator role definition:**
+   ```typescript
+   const orchestratorRole = await Read({
+     file_path: ".claude/agents/orchestrator.md"
+   });
+   ```
 
-WORKFLOW:
-- Update docs/session-tracker.md after each phase
-- Run phases automatically (Phase 1 → 8)
-- Use spawn patterns from your agent file (.claude/agents/orchestrator.md)
-- Implement token optimization strategies
+2. **Update session tracker to mark initialization:**
+   ```typescript
+   await Edit({
+     file_path: "docs/session-tracker.md",
+     old_string: "**Current Phase**: Not started",
+     new_string: `**Current Phase**: Phase 1: Discovery
+**Session Started**: ${new Date().toISOString()}`
+   });
+   ```
 
-PROJECT STRUCTURE:
-- docs/session-tracker.md exists (tracks progress)
-- All directories created (docs/, src/, tests/, etc.)
-- Git initialized
+3. **Greet the user and gather project info:**
+   - Ask user to describe their project idea (2-3 sentences)
+   - Ask about target users and main problem being solved
+   - Capture any technical preferences mentioned
 
-Begin by asking the user about their project.`
-});
-```
+4. **Begin Phase 1 (Discovery):**
+   ```typescript
+   await Task({
+     subagent_type: "Business Analyst",
+     description: "Create Product Brief",
+     prompt: `Create Product Brief for: [user's project description]
 
-**Result:** Orchestrator spawned and begins automated workflow
+     OUTPUT: docs/product-brief.md
+
+     Use template from: .claude/templates/product-brief-template.md
+
+     OUTPUT PROTOCOL:
+     Return only: "✅ Product Brief created. Sections: [N]. Pages: [M]."
+
+     DO NOT return full content.`
+   });
+   ```
+
+5. **Continue the workflow:**
+   - After each phase completes, advance to the next
+   - Update session-tracker.md after each phase
+   - Use spawn patterns from `.claude/agents/orchestrator.md`
+   - Implement token optimization strategies
+
+**Result:** YOU (main chat) are now the orchestrator and manage the entire workflow
 
 ## Step 3: Remove Old Workflow File
 
@@ -245,22 +265,22 @@ The old `bmm-workflow-status.yaml` is replaced by `session-tracker.md` which is:
 
 After /bmad-init completes:
 
-1. **Orchestrator greets you** and asks about your project
+1. **Main chat (as orchestrator) greets you** and asks about your project
 2. **You describe** your project idea (2-3 sentences)
-3. **Orchestrator spawns Business Analyst** (Phase 1: Discovery)
+3. **Main chat spawns Business Analyst** as subagent (Phase 1: Discovery)
 4. **Business Analyst creates** `docs/product-brief.md`
-5. **Orchestrator automatically advances** to Phase 2, 3, 4...
-6. **You can stop anytime** with Ctrl+C
+5. **Main chat automatically advances** to Phase 2, 3, 4...
+6. **You can stop anytime** with Ctrl+C or by asking
 7. **Resume anytime** with `/bmad-next`
 
-The orchestrator runs in **automated mode** - you describe your project once, then it orchestrates all 12 agents through the complete workflow.
+The main chat assumes the **orchestrator role in automated mode** - you describe your project once, then it orchestrates all 12 specialist agents through the complete workflow.
 
 ## Monitoring Progress
 
-While orchestrator runs:
+While you (as orchestrator) coordinate the workflow:
 - `/bmad-status` - Show current phase and progress
 - `/bmad-track` - Show epic/story dashboard
-- `docs/session-tracker.md` - Live progress tracker
+- `docs/session-tracker.md` - Your persistent state file
 
 ## Agent Team Environment Setup
 

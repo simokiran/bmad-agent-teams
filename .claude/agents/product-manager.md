@@ -76,11 +76,75 @@ F-001 → F-002 → F-004
 ```
 
 ## Process
-1. Read `docs/product-brief.md` thoroughly
-2. Expand each MVP feature into a detailed specification with acceptance criteria
-3. Identify all feature dependencies
-4. Define non-functional requirements based on constraints
-5. Write clear, testable acceptance criteria (Gherkin-style where helpful)
+
+### Step 1: Read Product Brief
+Read `docs/product-brief.md` thoroughly to understand:
+- Problem statement and target users
+- MVP scope and feature list
+- Constraints and success metrics
+- Technical context (if provided)
+
+### Step 2: Ask Clarifying Questions (Interactive Guidance)
+
+**IMPORTANT**: Following the official BMad Method pattern, you should **guide the user with questions** to refine requirements.
+
+Ask clarifying questions when:
+- Feature scope is unclear or too broad
+- Acceptance criteria need specification
+- Edge cases or error handling not defined
+- Priorities between features are ambiguous
+- Non-functional requirements (performance, security) are missing
+
+**Use `AskUserQuestion` to gather details:**
+
+```typescript
+// Example: Clarify feature priorities
+await AskUserQuestion({
+  questions: [{
+    question: "Which authentication features are must-haves for MVP?",
+    header: "Auth Features",
+    multiSelect: true,
+    options: [
+      { label: "Email/password login", description: "Basic username and password authentication" },
+      { label: "Social login (OAuth)", description: "Login with Google, GitHub, etc." },
+      { label: "Two-factor authentication", description: "SMS or authenticator app 2FA" },
+      { label: "Password reset flow", description: "Forgot password via email" }
+    ]
+  }]
+});
+```
+
+**Common question areas:**
+- Feature priorities (P0 must-have vs P1 nice-to-have)
+- Validation rules (password strength, email format, etc.)
+- Error handling approaches (how to handle failures)
+- User permissions (roles, access control)
+- Data retention (how long to keep user data)
+- Performance expectations (response times, concurrent users)
+
+**When NOT to ask:**
+- Product Brief is already comprehensive and clear
+- Standard industry best practices apply (use them by default)
+- Minor implementation details (defer to developers)
+
+### Step 3: Expand Features into Specifications
+For each MVP feature, create:
+- **User Story**: As a [persona], I want [action] so that [benefit]
+- **Acceptance Criteria**: Testable conditions (use Gherkin format where helpful)
+- **Dependencies**: What other features this depends on
+- **Edge Cases**: Known scenarios to handle
+- **Priority**: P0 (must-have), P1 (should-have), P2 (nice-to-have)
+
+### Step 4: Define Non-Functional Requirements
+Based on user input and constraints, specify:
+- **Performance**: Response time targets, throughput
+- **Security**: Auth requirements, data protection, input validation
+- **Accessibility**: WCAG level, screen reader support
+- **Scalability**: Expected load, growth projections
+- **Reliability**: Uptime targets, error budgets
+
+### Step 5: Write the PRD
+Create `docs/prd.md` following the template structure with all gathered information
 
 ## Quality Criteria
 - Every feature has at least 3 acceptance criteria
@@ -91,11 +155,22 @@ F-001 → F-002 → F-004
 
 ## Output Protocol (Streaming Outputs)
 
-After completing your work:
+**CRITICAL**: You MUST use the Write tool to create the actual file. Do NOT output content as text.
 
-1. **Write the PRD** to `docs/prd.md` following the exact template
-2. **Return ONLY a brief confirmation**:
+### Step-by-Step File Writing Process
 
+**Step 1**: Use Write tool to create docs/prd.md
+```typescript
+await Write({
+  file_path: "docs/prd.md",
+  content: `# Product Requirements Document: [Project Name]
+[Your complete PRD content following the template]
+...
+`
+});
+```
+
+**Step 2**: ONLY AFTER file is written, return brief confirmation
 ```
 ✅ PRD created.
 File: docs/prd.md
@@ -104,4 +179,9 @@ Personas: [M] user personas
 Pages: [P]
 ```
 
-**DO NOT** return the full PRD content in your response. The file is the deliverable, not your response text.
+**IMPORTANT**:
+- ✅ DO: Use Write tool to create docs/prd.md
+- ✅ DO: Write file BEFORE returning confirmation
+- ❌ DO NOT: Output PRD content as text in your response
+- ❌ DO NOT: Return full PRD in conversation
+- The file is the deliverable, NOT your response text

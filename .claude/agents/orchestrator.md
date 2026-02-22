@@ -549,6 +549,59 @@ Skill("bmad-generate-summary")
 # Future agents read summary FIRST instead of full PRD (20k) + Architecture (25k)
 ```
 
+### Phase 3→4 Approval Gate (INTERACTIVE)
+
+**AFTER Phase 3 completes, BEFORE spawning Scrum Master:**
+
+```typescript
+// 1. Present Phase 3 summary
+const archFiles = await Bash({
+  command: "ls -1 docs/architecture.md docs/adrs/*.md docs/naming-registry.md docs/skills-required.md 2>/dev/null | wc -l",
+  description: "Count architecture artifacts"
+});
+
+// 2. Read architecture for quality gate score
+const archContent = await Read({ file_path: "docs/architecture.md" });
+// Look for "Quality gate: [score]/100" in the architect's output
+
+// 3. Ask for approval
+const approval = await AskUserQuestion({
+  questions: [{
+    question: "Phase 3 (Architecture) complete. Review docs/architecture.md and approve to proceed?",
+    header: "Phase Gate",
+    multiSelect: false,
+    options: [
+      {
+        label: "Proceed to Phase 4 (Recommended)",
+        description: "Architecture approved, begin epic creation and sprint planning"
+      },
+      {
+        label: "Review first",
+        description: "I want to review the architecture before proceeding"
+      },
+      {
+        label: "Request changes",
+        description: "Architecture needs revisions"
+      }
+    ]
+  }]
+});
+
+// 4. Handle response
+if (approval.includes("Review first")) {
+  await Edit({
+    file_path: "docs/session-tracker.md",
+    old_string: "**Next Action**: [What needs to happen next]",
+    new_string: "**Next Action**: Waiting for user to review architecture. Run /bmad-next when ready."
+  });
+  return "✅ Take your time reviewing. Run /bmad-next when ready to proceed to Phase 4.";
+} else if (approval.includes("Request changes")) {
+  // User will describe changes in follow-up message
+  return "Please describe what changes you'd like, and I'll re-spawn the System Architect with your feedback.";
+}
+// Otherwise, proceed to Phase 4
+```
+
 ### Phase 4: Epic Creation + Sprint Plan
 - Spawn: `scrum-master`
 - Input: `docs/prd.md`, `docs/architecture.md`, `docs/ux-wireframes.md`
@@ -710,6 +763,93 @@ function extractNamingForTrack(track, summary) {
 - EPIC-002 → STORY-100 through STORY-199
 - EPIC-003 → STORY-200 through STORY-299
 - EPIC-NNN → STORY-(NNN×100-99) through STORY-(NNN×100)
+
+### Phase 4b→5 Approval Gate (INTERACTIVE)
+
+**AFTER Phase 4b completes (all story writers done), BEFORE spawning developers:**
+
+```typescript
+// 1. Count stories created
+const storyCount = await Bash({
+  command: "ls -1 docs/stories/STORY-*.md 2>/dev/null | wc -l",
+  description: "Count total stories created"
+});
+
+const epicCount = await Bash({
+  command: "ls -1 docs/epics/EPIC-*.md 2>/dev/null | wc -l",
+  description: "Count total epics"
+});
+
+// 2. Calculate total story points
+// (Read each story file and sum points - optional)
+
+// 3. Present summary
+const summary = `
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📋 PHASE 4b COMPLETE: Story Creation
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ All Story Writers completed
+
+Stories Created: ${storyCount} stories across ${epicCount} epics
+Location: docs/stories/STORY-*.md
+
+Each story includes:
+- User story format (As a... I want... So that...)
+- Acceptance criteria (testable)
+- Story points (complexity estimate)
+- Track assignment (Frontend/Backend/Database/Mobile)
+- Dependencies (other stories)
+- Git task tracking section (for commits)
+
+Next Phase: Phase 5 - Implementation
+- Create Agent Team (Database → Backend → Frontend + Mobile)
+- Developers claim stories from their tracks
+- Each task → git commit with SHA tracking
+- Each story complete → git push
+- Parallel coordination via team messaging
+
+⚠️  This is where code gets written. Review stories before proceeding!
+`;
+
+console.log(summary);
+
+// 4. Ask for approval
+const approval = await AskUserQuestion({
+  questions: [{
+    question: "All stories created. Ready to begin implementation (Phase 5)?",
+    header: "Phase Gate",
+    multiSelect: false,
+    options: [
+      {
+        label: "Begin implementation (Recommended)",
+        description: "Stories look good, spawn developer team to start coding"
+      },
+      {
+        label: "Review stories first",
+        description: "I want to review docs/stories/ before code is written"
+      },
+      {
+        label: "Adjust stories",
+        description: "Some stories need changes before implementation"
+      }
+    ]
+  }]
+});
+
+// 5. Handle response
+if (approval.includes("Review stories first")) {
+  await Edit({
+    file_path: "docs/session-tracker.md",
+    old_string: "**Next Action**: [What needs to happen next]",
+    new_string: "**Next Action**: Waiting for user to review stories. Run /bmad-next when ready to begin implementation."
+  });
+  return "✅ Review the stories in docs/stories/. Run /bmad-next when ready to begin coding.";
+} else if (approval.includes("Adjust stories")) {
+  return "Please describe which stories need changes, and I'll update them or re-spawn story writers.";
+}
+// Otherwise, proceed to Phase 5
+```
 
 ### Phase 5: Implementation (PARALLEL — Agent Team + Mobile)
 - Spawn Agent Team: `database-engineer` → `backend-developer` → (`frontend-developer` + `mobile-developer` in parallel)
@@ -934,6 +1074,84 @@ DO NOT return the full deployment config in your response.`
 });
 ```
 
+### Phase 7→8 Approval Gate (INTERACTIVE)
+
+**AFTER Phase 7 completes (deployment config ready), BEFORE spawning Tech Lead:**
+
+```typescript
+// 1. Check deployment artifacts
+const deployFiles = await Bash({
+  command: "ls -1 docs/deploy-config.md .github/workflows/*.yml Dockerfile 2>/dev/null",
+  description: "List deployment artifacts"
+});
+
+// 2. Present summary
+const summary = `
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📋 PHASE 7 COMPLETE: Deployment
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ DevOps Engineer completed deployment configuration
+
+Artifacts Created:
+- docs/deploy-config.md (deployment documentation)
+- CI/CD pipeline configurations
+- Environment setup scripts
+- Deployment workflows
+
+Next Phase: Phase 8 - Final Review
+- Tech Lead will review entire project
+- Code quality, architecture compliance, test coverage
+- Security assessment, deployment readiness
+- Final verdict: Ship / Ship with Notes / Do Not Ship
+
+⚠️  This is the final gate before production deployment!
+`;
+
+console.log(summary);
+
+// 3. Ask for approval
+const approval = await AskUserQuestion({
+  questions: [{
+    question: "Deployment config complete. Ready for final Tech Lead review?",
+    header: "Phase Gate",
+    multiSelect: false,
+    options: [
+      {
+        label: "Begin final review (Recommended)",
+        description: "Spawn Tech Lead to conduct comprehensive review"
+      },
+      {
+        label: "Review deployment config first",
+        description: "I want to review docs/deploy-config.md before final review"
+      },
+      {
+        label: "Skip final review",
+        description: "I'll handle the final review myself"
+      }
+    ]
+  }]
+});
+
+// 4. Handle response
+if (approval.includes("Review deployment config first")) {
+  await Edit({
+    file_path: "docs/session-tracker.md",
+    old_string: "**Next Action**: [What needs to happen next]",
+    new_string: "**Next Action**: Waiting for user to review deployment config. Run /bmad-next for final review."
+  });
+  return "✅ Review docs/deploy-config.md. Run /bmad-next when ready for final Tech Lead review.";
+} else if (approval.includes("Skip final review")) {
+  await Edit({
+    file_path: "docs/session-tracker.md",
+    old_string: "**Next Action**: [What needs to happen next]",
+    new_string: "**Next Action**: User handling final review manually. Project complete."
+  });
+  return "✅ Phase 7 complete. You'll handle the final review. Project artifacts are in docs/.";
+}
+// Otherwise, proceed to Phase 8
+```
+
 ### Phase 8: Final Review
 - Spawn: `tech-lead`
 - Output: `docs/review-checklist.md`
@@ -1123,6 +1341,98 @@ Next: [what can proceed now]
 - Update `docs/project-tracker.md` after every phase transition
 - Show git commit activity during Phase 5
 - Ask for user approval at: Phase 3→4, Phase 4b→5, Phase 7→8
+
+### User Approval Gates (Interactive Mode)
+
+**CRITICAL**: The BMad method runs in INTERACTIVE mode with user approval at key phase transitions.
+
+#### When to Ask for Approval
+
+1. **After Phase 3 (Architecture) → Before Phase 4 (Epic Creation)**
+2. **After Phase 4b (Story Creation) → Before Phase 5 (Implementation)**
+3. **After Phase 7 (Deployment) → Before Phase 8 (Final Review)**
+
+#### How to Ask for Approval
+
+Use the `AskUserQuestion` tool to present a summary and get explicit approval:
+
+```typescript
+// Example: After Phase 3 completes
+const approval = await AskUserQuestion({
+  questions: [{
+    question: "Phase 3 (Architecture) is complete. Ready to proceed to Phase 4 (Epic Creation)?",
+    header: "Phase Gate",
+    multiSelect: false,
+    options: [
+      {
+        label: "Proceed to Phase 4 (Recommended)",
+        description: "Architecture looks good, begin epic creation and sprint planning"
+      },
+      {
+        label: "Review architecture first",
+        description: "I want to review docs/architecture.md before proceeding"
+      },
+      {
+        label: "Revise architecture",
+        description: "Architecture needs changes before we create epics"
+      }
+    ]
+  }]
+});
+
+if (approval === "Proceed to Phase 4") {
+  // Continue to Phase 4
+} else if (approval === "Review architecture first") {
+  // Wait for user to review, they'll run /bmad-next when ready
+  return "Take your time reviewing docs/architecture.md. Run /bmad-next when ready to proceed.";
+} else {
+  // User wants revisions
+  return "Please describe what changes you'd like to the architecture, and I'll re-spawn the System Architect.";
+}
+```
+
+#### Approval Gate Template
+
+For each gate, present:
+1. **Phase Summary**: What was completed
+2. **Key Artifacts**: Files created (with file paths)
+3. **Quality Gate Result**: Pass/Fail and score (if applicable)
+4. **Next Phase Preview**: What will happen next
+5. **Options**: Proceed / Review / Revise
+
+**Example Output to User:**
+
+```markdown
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📋 PHASE 3 COMPLETE: Architecture
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ System Architect completed architecture design
+
+Artifacts Created:
+- docs/architecture.md (comprehensive system design)
+- docs/adrs/ADR-001.md (Database: PostgreSQL vs MySQL)
+- docs/adrs/ADR-002.md (Frontend: Next.js vs React+Vite)
+- docs/adrs/ADR-003.md (Auth: JWT vs Session-based)
+- docs/naming-registry.md (naming conventions across all layers)
+- docs/skills-required.md (Claude Code skills to use)
+
+Quality Gate: ✅ PASSED (Score: 94/100)
+- Tech stack selection: Complete
+- Database design: Detailed ER diagram
+- API design: RESTful with versioning
+- Security architecture: Auth + RBAC + input validation
+
+Next Phase: Phase 4 - Epic Creation
+- Scrum Master will read PRD + Architecture
+- Break features into epics
+- Create sprint plan
+- Assign epics to tracks (Frontend, Backend, Database)
+
+Ready to proceed?
+```
+
+Then use AskUserQuestion with the options above.
 
 ## Error Recovery
 - If an agent produces incomplete output → re-spawn with specific feedback
