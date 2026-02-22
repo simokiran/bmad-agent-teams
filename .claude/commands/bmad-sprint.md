@@ -145,18 +145,23 @@ for (const storyFile of stories) {
 console.log(`✅ Created ${stories.length} tasks from stories`);
 ```
 
-### Step 4: Spawn Developer Agents as Teammates
+### Step 4: Spawn Developer Agents as Teammates (Parallel)
 
-**IMPORTANT**: Spawn developers in the correct order with proper coordination:
+**IMPORTANT**: Spawn all 3 developers in PARALLEL using Promise.all. This allows:
+- ✅ True parallel execution (all 3 run simultaneously)
+- ✅ Interactive permission requests (Edit, Bash, Write tools work)
+- ✅ Agents coordinate via SendMessage and task dependencies
 
 ```typescript
-// Database Engineer (Foundation - runs first)
-await Task({
-  team_name: "sprint-1",
-  name: "db-engineer",
-  subagent_type: "Database Engineer",
-  description: "Implement Database stories",
-  prompt: `You are working on Sprint 1 as part of an Agent Team.
+// Spawn all 3 agents in parallel (concurrent foreground mode)
+await Promise.all([
+  // Database Engineer (Foundation)
+  Task({
+    team_name: "sprint-1",
+    name: "db-engineer",
+    subagent_type: "Database Engineer",
+    description: "Implement Database stories",
+    prompt: `You are working on Sprint 1 as part of an Agent Team.
 
 **ROLE**: Database Engineer
 
@@ -188,17 +193,16 @@ await Task({
 After completing all your stories, return ONLY:
 "✅ Database stories complete. Stories: [list]. Commits: [N]. All pushed: Yes/No."
 
-DO NOT return full code in your response. Files are the deliverable.`,
-  run_in_background: true
-});
+DO NOT return full code in your response. Files are the deliverable.`
+  }),
 
-// Backend Developer (Depends on Database)
-await Task({
-  team_name: "sprint-1",
-  name: "backend-dev",
-  subagent_type: "Backend Developer",
-  description: "Implement Backend stories",
-  prompt: `You are working on Sprint 1 as part of an Agent Team.
+  // Backend Developer (Coordinates with Database)
+  Task({
+    team_name: "sprint-1",
+    name: "backend-dev",
+    subagent_type: "Backend Developer",
+    description: "Implement Backend stories",
+    prompt: `You are working on Sprint 1 as part of an Agent Team.
 
 **ROLE**: Backend Developer
 
@@ -228,17 +232,16 @@ await Task({
 After completing all your stories, return ONLY:
 "✅ Backend stories complete. Stories: [list]. Endpoints: [N]. Tests: [M]. All pushed: Yes/No."
 
-DO NOT return full code in your response. Files are the deliverable.`,
-  run_in_background: true
-});
+DO NOT return full code in your response. Files are the deliverable.`
+  }),
 
-// Frontend Developer (Depends on Backend)
-await Task({
-  team_name: "sprint-1",
-  name: "frontend-dev",
-  subagent_type: "Frontend Developer",
-  description: "Implement Frontend stories",
-  prompt: `You are working on Sprint 1 as part of an Agent Team.
+  // Frontend Developer (Coordinates with Backend)
+  Task({
+    team_name: "sprint-1",
+    name: "frontend-dev",
+    subagent_type: "Frontend Developer",
+    description: "Implement Frontend stories",
+    prompt: `You are working on Sprint 1 as part of an Agent Team.
 
 **ROLE**: Frontend Developer
 
@@ -269,14 +272,14 @@ await Task({
 After completing all your stories, return ONLY:
 "✅ Frontend stories complete. Stories: [list]. Components: [N]. Tests: [M]. All pushed: Yes/No."
 
-DO NOT return full code in your response. Files are the deliverable.`,
-  run_in_background: true
-});
+DO NOT return full code in your response. Files are the deliverable.`
+  })
+]);
 
-console.log("✅ Spawned 3 developer agents as teammates (DB, Backend, Frontend)");
-console.log("   - db-engineer: Running in background");
-console.log("   - backend-dev: Running in background");
-console.log("   - frontend-dev: Running in background");
+console.log("✅ Spawned 3 developer agents in PARALLEL as teammates");
+console.log("   - All agents running concurrently (not background)");
+console.log("   - Agents can request Edit/Bash/Write permissions interactively");
+console.log("   - Coordination via SendMessage and task dependencies");
 ```
 
 ### Step 5: Monitor Progress
