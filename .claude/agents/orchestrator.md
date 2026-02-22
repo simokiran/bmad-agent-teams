@@ -167,9 +167,40 @@ await Edit({
 
 **CRITICAL**: If conversation is compacted, follow this protocol IMMEDIATELY:
 
-#### Step 1: Read Session Tracker
+#### Step 1: Detect Compaction and Update Counter
+
 ```typescript
-// FIRST action after compaction
+// FIRST: Detect if compaction occurred
+// Indicators: You don't remember recent context, or session tracker shows work you don't recall
+
+const wasCompacted = !!(
+  // You're being told to resume but don't remember spawning agents
+  // OR session tracker shows phase progress you don't recall
+  // OR active background tasks you didn't spawn
+);
+
+if (wasCompacted) {
+  // Read current compaction count
+  const sessionState = await Read({ file_path: "docs/session-tracker.md" });
+  const currentCount = parseInt(sessionState.match(/Context Compaction Events\*\*: (\d+)/)?.[1] || "0");
+
+  // Increment and update
+  await Edit({
+    file_path: "docs/session-tracker.md",
+    old_string: `**Context Compaction Events**: ${currentCount} times compacted`,
+    new_string: `**Context Compaction Events**: ${currentCount + 1} times compacted`
+  });
+
+  await Edit({
+    file_path: "docs/session-tracker.md",
+    old_string: "**Last Compaction**: N/A",
+    new_string: `**Last Compaction**: ${new Date().toISOString()}`
+  });
+
+  console.log(`⚠️  Context compaction detected (Event #${currentCount + 1}). Using session tracker for recovery.`);
+}
+
+// NOW read session tracker for recovery
 const sessionState = await Read({
   file_path: "docs/session-tracker.md"
 });

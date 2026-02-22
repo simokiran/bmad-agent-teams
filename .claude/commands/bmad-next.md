@@ -89,6 +89,52 @@ const orchestratorRole = await Read({ file_path: ".claude/agents/orchestrator.md
 // 2. Load session state
 const sessionState = await Read({ file_path: "docs/session-tracker.md" });
 
+// 3. DETECT COMPACTION: Ask user if context was compacted
+// This is the most reliable way since the orchestrator can't detect it automatically
+
+const currentCompactionCount = parseInt(sessionState.match(/Context Compaction Events\*\*: (\d+)/)?.[1] || "0");
+
+// Check if session tracker indicates ongoing work
+const hasOngoingWork = (
+  sessionState.includes("⏳") || // Work in progress markers
+  sessionState.includes("🔴 Background Task ID") || // Background tasks
+  sessionState.includes("In Progress") // Phase status
+);
+
+// If there's ongoing work and this is a resume, ask user about compaction
+if (hasOngoingWork) {
+  const compactionCheck = await AskUserQuestion({
+    questions: [{
+      question: "Was your conversation context compacted (summarized) since the last update?",
+      header: "Compaction",
+      multiSelect: false,
+      options: [
+        { label: "No, continuing same session", description: "Context is intact, no compaction occurred" },
+        { label: "Yes, context was compacted", description: "Conversation was summarized, using session tracker for recovery" }
+      ]
+    }]
+  });
+
+  if (compactionCheck.includes("Yes")) {
+    // Increment compaction counter
+    await Edit({
+      file_path: "docs/session-tracker.md",
+      old_string: `**Context Compaction Events**: ${currentCompactionCount} times compacted`,
+      new_string: `**Context Compaction Events**: ${currentCompactionCount + 1} times compacted`
+    });
+
+    const now = new Date().toISOString();
+    await Edit({
+      file_path: "docs/session-tracker.md",
+      old_string: "**Last Compaction**: N/A",
+      new_string: `**Last Compaction**: ${now}`
+    });
+
+    console.log(`⚠️  Context compaction event #${currentCompactionCount + 1} recorded.`);
+    console.log(`   Using session tracker for recovery...`);
+  }
+}
+
 // 3. Analyze state
 // - Parse current phase from session tracker
 // - Check which artifacts exist (product-brief.md, prd.md, etc.)
