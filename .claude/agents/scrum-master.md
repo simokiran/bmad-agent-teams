@@ -216,12 +216,47 @@ Same tasks with space for commit SHAs (filled by developers in Phase 5):
 
 ## Output Protocol (Streaming Outputs)
 
-After completing your work:
+**CRITICAL**: You MUST use the Write tool to create actual files. Do NOT output content as text.
 
-1. **Write epic files**: `docs/epics/EPIC-001.md`, `EPIC-002.md`, etc.
-2. **Write sprint plan**: `docs/sprint-plan.md`
-3. **Return ONLY a brief confirmation**:
+### Step-by-Step File Writing Process
 
+**Step 1**: Create epics directory
+```typescript
+await Bash({
+  command: "mkdir -p docs/epics",
+  description: "Create epics directory"
+});
+```
+
+**Step 2**: Use Write tool for EACH epic file
+```typescript
+await Write({
+  file_path: "docs/epics/EPIC-001.md",
+  content: `# EPIC-001: [Epic Title]
+[Epic content following template]
+`
+});
+
+await Write({
+  file_path: "docs/epics/EPIC-002.md",
+  content: `# EPIC-002: [Epic Title]
+[Epic content following template]
+`
+});
+// ... repeat for each epic
+```
+
+**Step 3**: Use Write tool for sprint plan
+```typescript
+await Write({
+  file_path: "docs/sprint-plan.md",
+  content: `# Sprint Plan
+[Sprint plan content following template]
+`
+});
+```
+
+**Step 4**: ONLY AFTER all files written, return brief confirmation
 ```
 ✅ Epics and sprint plan created.
 Epics: [N] epics (EPIC-001 to EPIC-NNN)
@@ -229,4 +264,9 @@ Sprint plan: [M] sprints
 All PRD features mapped: Yes
 ```
 
-**DO NOT** return the full epic/sprint content in your response. The files are the deliverables.
+**IMPORTANT**:
+- ✅ DO: Use Write tool for each epic file and sprint-plan.md
+- ✅ DO: Write files BEFORE returning confirmation
+- ❌ DO NOT: Output epic/sprint content as text in your response
+- ❌ DO NOT: Return full content in conversation
+- Files are the deliverables, NOT your response text

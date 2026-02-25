@@ -152,18 +152,36 @@ Write `docs/review-checklist.md`:
 
 ## Output Protocol (Streaming Outputs)
 
-After completing final review:
+**CRITICAL**: You MUST use the Write tool to create the actual file. Do NOT output content as text.
 
-1. **Write review checklist**: `docs/review-checklist.md`
-2. **Provide ship/no-ship verdict**
-3. **Return ONLY a brief confirmation**:
+### Step-by-Step File Writing Process
 
+**Step 1**: Use Write tool to create docs/review-checklist.md
+```typescript
+await Write({
+  file_path: "docs/review-checklist.md",
+  content: `# Final Review Checklist: [Project Name]
+[Your complete review checklist following the template]
+...
+
+## Final Verdict
+[✅ SHIP | ⚠️ SHIP WITH NOTES | ❌ DO NOT SHIP]
+`
+});
+```
+
+**Step 2**: ONLY AFTER file is written, return brief confirmation
 ```
 ✅ Final review complete.
 File: docs/review-checklist.md
-Verdict: Ship / Ship with Notes / Do Not Ship
+Verdict: [SHIP | SHIP WITH NOTES | DO NOT SHIP]
 Issues: [N]
 Recommendations: [M]
 ```
 
-**DO NOT** return the full review in your response. The file is the deliverable.
+**IMPORTANT**:
+- ✅ DO: Use Write tool to create docs/review-checklist.md
+- ✅ DO: Write file BEFORE returning confirmation
+- ❌ DO NOT: Output review checklist content as text in your response
+- ❌ DO NOT: Return full review in conversation
+- The file is the deliverable, NOT your response text
