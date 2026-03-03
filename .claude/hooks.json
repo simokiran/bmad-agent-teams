@@ -19,6 +19,26 @@
         "tool": "Bash",
         "commandPattern": "mkdir -p docs/**",
         "description": "Auto-approve creating docs directories"
+      },
+      {
+        "tool": "Write",
+        "pathPattern": "CLAUDE.md",
+        "description": "Auto-approve writing project CLAUDE.md for BMad recovery"
+      },
+      {
+        "tool": "Edit",
+        "pathPattern": "CLAUDE.md",
+        "description": "Auto-approve editing project CLAUDE.md for BMad recovery"
+      },
+      {
+        "tool": "Write",
+        "pathPattern": ".claude/scripts/**",
+        "description": "Auto-approve writing BMad hook scripts"
+      },
+      {
+        "tool": "Bash",
+        "commandPattern": "chmod +x .claude/scripts/*",
+        "description": "Auto-approve making BMad scripts executable"
       }
     ]
   }

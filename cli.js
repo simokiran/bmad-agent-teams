@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * BMad Agent Teams CLI
- * Installs the 12-agent BMad Method into any project directory
+ * Installs the 15-agent BMad Method into any project directory
  */
 
 const { execSync } = require('child_process');
@@ -21,7 +21,7 @@ const command = args[0] || 'help';
 function printHeader() {
   console.log(`${BOLD}`);
   console.log('╔══════════════════════════════════════════════════╗');
-  console.log('║  BMad Method — 12-Agent AI Development Team     ║');
+  console.log('║  BMad Method — 15-Agent AI Development Team     ║');
   console.log('║  Claude Code Extension                           ║');
   console.log('╚══════════════════════════════════════════════════╝');
   console.log(`${NC}\n`);
@@ -34,16 +34,19 @@ function printHelp() {
   console.log('');
   console.log('Commands:');
   console.log('  install [dir]    Install BMad Method to directory (default: current)');
+  console.log('  update [dir]     Update agents/commands/scripts (preserves project state)');
   console.log('  help             Show this help message');
   console.log('  version          Show version');
   console.log('');
   console.log('Options:');
   console.log('  --yes, -y        Skip confirmation prompts');
-  console.log('  --force          Overwrite existing files');
+  console.log('  --force          Overwrite all files including config');
+  console.log('  --update         Update mode (refresh plugin, preserve state)');
   console.log('');
   console.log('Examples:');
   console.log('  npx @bmad-code/agent-teams install');
   console.log('  npx @bmad-code/agent-teams install ./my-project --yes');
+  console.log('  npx @bmad-code/agent-teams update ./my-project');
   console.log('  npx @bmad-code/agent-teams install ~/projects/webapp --force');
   console.log('');
 }
@@ -53,11 +56,14 @@ function printVersion() {
   console.log(`BMad Agent Teams v${pkg.version}`);
 }
 
-function install() {
-  const targetIndex = args.indexOf('install') + 1;
+function run(isUpdate) {
+  // Find the command word index to parse args after it
+  const cmdWord = isUpdate ? 'update' : 'install';
+  const targetIndex = args.indexOf(cmdWord) + 1;
   let targetDir = '.';
   let autoYes = false;
   let force = false;
+  let update = isUpdate;
 
   // Parse arguments
   for (let i = targetIndex; i < args.length; i++) {
@@ -66,6 +72,8 @@ function install() {
       autoYes = true;
     } else if (arg === '--force') {
       force = true;
+    } else if (arg === '--update') {
+      update = true;
     } else if (!arg.startsWith('--')) {
       targetDir = arg;
     }
@@ -76,42 +84,28 @@ function install() {
 
   // Check if directory exists
   if (!fs.existsSync(target)) {
-    console.log(`${YELLOW}⚠️  Directory does not exist. Create it? (y/N)${NC}`);
-    if (!autoYes) {
-      // Would need interactive input here - for now just create it
-      fs.mkdirSync(target, { recursive: true });
-    } else {
-      fs.mkdirSync(target, { recursive: true });
+    if (update) {
+      console.error(`${YELLOW}Directory does not exist: ${targetDir}. Cannot update.${NC}`);
+      process.exit(1);
     }
+    fs.mkdirSync(target, { recursive: true });
   }
 
   // Run the install script
   const scriptPath = path.join(__dirname, 'install.sh');
-  const installCommand = force
-    ? `BMAD_FORCE=1 bash "${scriptPath}" "${target}"`
-    : `bash "${scriptPath}" "${target}"`;
 
   try {
-    execSync(installCommand, {
+    execSync(`bash "${scriptPath}" "${target}"`, {
       stdio: 'inherit',
       env: {
         ...process.env,
-        BMAD_AUTO_YES: autoYes ? '1' : '0'
+        BMAD_AUTO_YES: autoYes ? '1' : '0',
+        BMAD_FORCE: force ? '1' : '0',
+        BMAD_UPDATE: update ? '1' : '0'
       }
     });
-
-    console.log('');
-    console.log(`${GREEN}✅ Installation complete!${NC}`);
-    console.log('');
-    console.log('Next steps:');
-    console.log(`  1. ${BLUE}cd ${targetDir}${NC}`);
-    console.log(`  2. ${BLUE}export CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1${NC}`);
-    console.log(`  3. ${BLUE}claude${NC}`);
-    console.log(`  4. ${BLUE}/bmad-init${NC}`);
-    console.log('');
-
   } catch (error) {
-    console.error(`${YELLOW}Installation failed${NC}`);
+    console.error(`${YELLOW}${update ? 'Update' : 'Installation'} failed${NC}`);
     process.exit(1);
   }
 }
@@ -119,7 +113,10 @@ function install() {
 // Main command router
 switch (command) {
   case 'install':
-    install();
+    run(false);
+    break;
+  case 'update':
+    run(true);
     break;
   case 'version':
   case '--version':

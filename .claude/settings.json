@@ -9,5 +9,31 @@
       "Write",
       "Execute"
     ]
+  },
+  "hooks": {
+    "PreCompact": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/scripts/bmad-pre-compact.sh",
+            "timeout": 30
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "matcher": "compact",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/scripts/bmad-post-compact.sh",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
   }
 }

@@ -5,16 +5,16 @@
 # Automates the commit-per-task and push-per-story workflow.
 #
 # Usage:
-#   ./scripts/bmad-git.sh task-commit STORY-001 "Implement login form validation"
-#   ./scripts/bmad-git.sh story-push STORY-001 "User Authentication"
-#   ./scripts/bmad-git.sh sprint-start 1
-#   ./scripts/bmad-git.sh sprint-merge 1
-#   ./scripts/bmad-git.sh status STORY-001
+#   .claude/scripts/bmad-git.sh task-commit STORY-001 "Implement login form validation"
+#   .claude/scripts/bmad-git.sh story-push STORY-001 "User Authentication"
+#   .claude/scripts/bmad-git.sh sprint-start 1
+#   .claude/scripts/bmad-git.sh sprint-merge 1
+#   .claude/scripts/bmad-git.sh status STORY-001
 # ============================================================================
 
 set -euo pipefail
 
-PROJECT_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+PROJECT_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 STORIES_DIR="$PROJECT_ROOT/docs/stories"
 
 GREEN='\033[0;32m'
@@ -67,27 +67,27 @@ task_commit() {
   if [[ -n "$task_num" ]]; then
     # Update by task number: find the row starting with "| N |"
     # Replace ⬜ with ✅, — with SHA, — with timestamp
-    sed -i "s/| ${task_num} |.*⬜.*|.*—.*|.*—.*|/| ${task_num} | ${task_desc} | ✅ | \`${sha}\` | ${timestamp} |/" "$story_file"
+    sed -i '' "s/| ${task_num} |.*⬜.*|.*—.*|.*—.*|/| ${task_num} | ${task_desc} | ✅ | \`${sha}\` | ${timestamp} |/" "$story_file"
   fi
 
   # Append to Commit Log section
   # Find the commit log code block and append
   local log_entry="${sha}  ${commit_msg}"
-  sed -i "/^(populated by developer/c\\${log_entry}" "$story_file" 2>/dev/null || true
+  sed -i '' "/^(populated by developer/c\\${log_entry}" "$story_file" 2>/dev/null || true
 
   # Update Total Commits count
   local total_commits=$(git log --oneline --all | grep -c "\[${story_id}\]" 2>/dev/null || echo "0")
-  sed -i "s/\*\*Total Commits\*\*: [0-9]*/\*\*Total Commits\*\*: ${total_commits}/" "$story_file" 2>/dev/null || true
+  sed -i '' "s/\*\*Total Commits\*\*: [0-9]*/\*\*Total Commits\*\*: ${total_commits}/" "$story_file" 2>/dev/null || true
 
   # Update First/Last Commit
   local first_sha=$(git log --oneline --reverse --all | grep "\[${story_id}\]" | head -1 | awk '{print $1}')
   local last_sha="$sha"
-  sed -i "s/\*\*First Commit\*\*: .*/\*\*First Commit\*\*: \`${first_sha}\`/" "$story_file" 2>/dev/null || true
-  sed -i "s/\*\*Last Commit\*\*: .*/\*\*Last Commit\*\*: \`${last_sha}\`/" "$story_file" 2>/dev/null || true
+  sed -i '' "s/\*\*First Commit\*\*: .*/\*\*First Commit\*\*: \`${first_sha}\`/" "$story_file" 2>/dev/null || true
+  sed -i '' "s/\*\*Last Commit\*\*: .*/\*\*Last Commit\*\*: \`${last_sha}\`/" "$story_file" 2>/dev/null || true
 
   # If story was "Not Started", change to "In Progress"
-  sed -i 's/- \[x\] Not Started/- [ ] Not Started/' "$story_file" 2>/dev/null || true
-  sed -i 's/- \[ \] In Progress/- [x] In Progress/' "$story_file" 2>/dev/null || true
+  sed -i '' 's/- \[x\] Not Started/- [ ] Not Started/' "$story_file" 2>/dev/null || true
+  sed -i '' 's/- \[ \] In Progress/- [x] In Progress/' "$story_file" 2>/dev/null || true
 
   echo ""
   echo "  Story: ${story_id}"
@@ -111,21 +111,21 @@ story_push() {
   fi
 
   # Update story status to Done
-  sed -i 's/- \[x\] In Progress/- [ ] In Progress/' "$story_file" 2>/dev/null || true
-  sed -i 's/- \[x\] Code Complete/- [ ] Code Complete/' "$story_file" 2>/dev/null || true
-  sed -i 's/- \[ \] Tests Passing/- [x] Tests Passing/' "$story_file" 2>/dev/null || true
-  sed -i 's/- \[ \] Pushed/- [x] Pushed/' "$story_file" 2>/dev/null || true
-  sed -i 's/- \[ \] Done/- [x] Done/' "$story_file" 2>/dev/null || true
+  sed -i '' 's/- \[x\] In Progress/- [ ] In Progress/' "$story_file" 2>/dev/null || true
+  sed -i '' 's/- \[x\] Code Complete/- [ ] Code Complete/' "$story_file" 2>/dev/null || true
+  sed -i '' 's/- \[ \] Tests Passing/- [x] Tests Passing/' "$story_file" 2>/dev/null || true
+  sed -i '' 's/- \[ \] Pushed/- [x] Pushed/' "$story_file" 2>/dev/null || true
+  sed -i '' 's/- \[ \] Done/- [x] Done/' "$story_file" 2>/dev/null || true
 
   # Update Pushed status in Git Summary
-  sed -i 's/\*\*Pushed\*\*: ❌ No/\*\*Pushed\*\*: ✅ Yes/' "$story_file" 2>/dev/null || true
+  sed -i '' 's/\*\*Pushed\*\*: ❌ No/\*\*Pushed\*\*: ✅ Yes/' "$story_file" 2>/dev/null || true
 
   # Commit the story file update
   git add "$story_file"
   git commit -m "[${story_id}] complete: ${story_title}"
 
   local final_sha=$(git rev-parse --short HEAD)
-  sed -i "s/\*\*Last Commit\*\*: .*/\*\*Last Commit\*\*: \`${final_sha}\`/" "$story_file" 2>/dev/null || true
+  sed -i '' "s/\*\*Last Commit\*\*: .*/\*\*Last Commit\*\*: \`${final_sha}\`/" "$story_file" 2>/dev/null || true
 
   # Push to sprint branch
   local branch=$(git branch --show-current)
@@ -216,11 +216,11 @@ update_tracker() {
 
   # Update "Last Updated" timestamp
   local now=$(date -u +"%Y-%m-%d %H:%M UTC")
-  sed -i "s/\*\*Last Updated\*\*: .*/\*\*Last Updated\*\*: ${now}/" "$tracker_file" 2>/dev/null || true
+  sed -i '' "s/\*\*Last Updated\*\*: .*/\*\*Last Updated\*\*: ${now}/" "$tracker_file" 2>/dev/null || true
 
   # Update branch name
   local branch=$(git branch --show-current 2>/dev/null || echo "N/A")
-  sed -i "s/\*\*Branch\*\*: .*/\*\*Branch\*\*: ${branch}/" "$tracker_file" 2>/dev/null || true
+  sed -i '' "s/\*\*Branch\*\*: .*/\*\*Branch\*\*: ${branch}/" "$tracker_file" 2>/dev/null || true
 
   log_ok "Project tracker updated at ${now}"
 }

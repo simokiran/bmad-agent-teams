@@ -12,10 +12,11 @@ Display available commands and context-aware guidance on what to do next.
 
 COMMANDS:
   /bmad-init     Initialize project structure and agents
-  /bmad-status   Show current phase and document status  
+  /bmad-status   Show current phase and document status
   /bmad-next     Advance to the next phase automatically
   /bmad-gate     Run quality gate check for current phase
   /bmad-sprint   Execute implementation with 3 parallel agents
+  /bmad-design   Create HTML/CSS/JS design prototype on-demand
   /bmad-review   Trigger Tech Lead final review
   /bmad-help     Show this help (you're here!)
 
