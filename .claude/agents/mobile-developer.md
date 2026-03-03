@@ -84,46 +84,47 @@ Read `docs/skills-required.md` to see if any Claude Code skills can help with th
 #    - Follow mobile UX specifications from ux-wireframes.md
 #    - Ensure API integration uses exact endpoints from naming-registry.md Section 2
 
-# c) Stage and commit with story-prefixed message:
-git add -A
-git commit -m "[STORY-NNN] task: <task description>"
-
-# c) Capture the commit SHA:
-COMMIT_SHA=$(git rev-parse --short HEAD)
-TIMESTAMP=$(date -u +"%Y-%m-%d %H:%M UTC")
-
-# d) Update the story file's Git Task Tracking table:
-#    Change the task row from:
-#    | 1 | Create RegisterScreen | ⬜ | — | — |
-#    To:
-#    | 1 | Create RegisterScreen | ✅ | `a1b2c3d` | 2025-02-19 14:23 UTC |
-
-# e) Also update the Commit Log section:
-#    ```
-#    a1b2c3d  [STORY-007] task: Create RegisterScreen with form
-#    b2c3d4e  [STORY-007] task: Add email validation
-#    ```
+# c) Commit and record SHA using the git helper:
+.claude/scripts/bmad-git.sh task-commit STORY-NNN "task description" TASK_NUMBER
+# This will: stage all changes, commit, capture SHA, update the story file's
+# Git Task Tracking table, Commit Log, and Git Summary automatically.
 ```
 
 ### 5. After ALL tasks are done:
 ```bash
-# Update story status to "Tests Passing" / "Done"
-# Update Story Git Summary:
-#   Total Commits: [N]
-#   First Commit: [SHA]
-#   Last Commit: [SHA]
-#   Pushed: ✅ Yes
-
-# Final commit for the story file update:
-git add docs/stories/STORY-NNN.md
-git commit -m "[STORY-NNN] complete: <story title>"
-
-# PUSH to remote:
-git push origin sprint/sprint-1
+# Mark story as done, commit, and push using the git helper:
+.claude/scripts/bmad-git.sh story-push STORY-NNN "Story Title"
+# This will: update story status to Done, commit story file, push to sprint branch,
+# and update the Git Summary (Total Commits, Last Commit, Pushed status).
 ```
 
 ### 6. Notify the team lead
 Use SendMessage to tell the orchestrator this story is complete and pushed.
+
+---
+
+## Handling Fix Requests
+
+### From Tech Lead Review
+
+When re-spawned to fix issues from a Tech Lead per-story review:
+
+1. Read your story file's **Review & QA → Review Feedback** table for the specific issues
+2. Fix each issue — keep changes minimal, only what's needed to resolve the reported problem
+3. Commit each fix: `.claude/scripts/bmad-git.sh task-commit STORY-NNN "fix: [issue description]" FIX_ROUND`
+4. Update the story's Review Feedback table with the fix commit SHA
+5. Do NOT push — the orchestrator coordinates push after review cycle completes
+
+### From QA Bug Report
+
+When re-spawned to fix bugs found by QA:
+
+1. Read `docs/test-plan.md` Bug Report section for bugs assigned to your track
+2. For each bug, read the Steps to Reproduce and Root Cause
+3. Fix the bug — minimal changes only
+4. Commit: `.claude/scripts/bmad-git.sh task-commit STORY-NNN "fix: BUG-NNN [description]" BUG_FIX`
+5. Update the story's **Review & QA → QA Bugs** table with the fix commit SHA
+6. Do NOT push — the orchestrator coordinates push after QA re-test
 
 ---
 
@@ -539,18 +540,16 @@ Before marking a story "Done":
 
 ## Git Commit Best Practices
 
+Use descriptive task descriptions when calling the git helper:
 ```bash
-# Good commit messages
-[STORY-007] task: Create RegisterScreen with form inputs
-[STORY-007] task: Add email validation
-[STORY-007] task: Integrate register API endpoint
-[STORY-007] task: Add loading and error states
-[STORY-007] update: naming registry with RegisterScreen
+# Good — descriptive task names:
+.claude/scripts/bmad-git.sh task-commit STORY-007 "Create RegisterScreen with form inputs" 1
+.claude/scripts/bmad-git.sh task-commit STORY-007 "Add email validation" 2
+.claude/scripts/bmad-git.sh task-commit STORY-007 "Integrate register API endpoint" 3
 
-# Bad commit messages
-[STORY-007] task: stuff
-[STORY-007] task: fixed bug
-[STORY-007] task: updates
+# Bad — vague task names:
+.claude/scripts/bmad-git.sh task-commit STORY-007 "stuff" 1
+.claude/scripts/bmad-git.sh task-commit STORY-007 "fixed bug" 2
 ```
 
 ---

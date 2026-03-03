@@ -179,7 +179,22 @@ Mobile:   <TextInput keyboardType="email-address" />
 - [ ] Code Complete
 - [ ] Tests Passing
 - [ ] Pushed
+- [ ] In Review
+- [ ] Changes Requested
+- [ ] QA Passed
 - [ ] Done
+
+## Review & QA
+
+### Review Feedback
+| Round | Reviewer | Result | Issues | Fix Commit |
+|-------|----------|--------|--------|------------|
+| — | — | — | — | — |
+
+### QA Bugs
+| Bug ID | Description | Severity | Fix Commit | Verified |
+|--------|-------------|----------|------------|----------|
+| — | — | — | — | — |
 
 ## Developer Notes
 

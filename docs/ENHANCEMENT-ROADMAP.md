@@ -1,418 +1,240 @@
-# Enhancement Roadmap: Features from Original BMAD-METHOD
+# Enhancement Roadmap: BMad Agent Teams
 
-**Date**: 2026-02-19
+**Last Updated**: 2026-03-03
 **Source**: https://github.com/bmad-code-org/BMAD-METHOD
-**Status**: Proposal for v1.1+ releases
+**Current Version**: v1.0.3
 
 ---
 
 ## Overview
 
-This document outlines features from the original BMAD-METHOD that we can integrate into our Claude Code Agent Teams implementation to enhance functionality and user experience.
+This document tracks planned features, completed enhancements, and future priorities for the BMad Agent Teams Claude Code plugin.
 
 ---
 
-## Priority 1: Essential Missing Features
+## Completed Features
 
-### 1. Interactive Help System (`/bmad-help`)
+### v1.0 — Core Workflow
 
-**Current State**: We have `/bmad-status`, `/bmad-next`, `/bmad-gate` commands
-**Enhancement**: Add contextual help command
+- 14 specialized agent definitions (analyst, PM, UX, architect, scrum master, story writer, frontend dev, backend dev, database engineer, mobile dev, QA, devops, tech lead, orchestrator)
+- 8-phase document-driven workflow (Discovery → Final Review)
+- Parallel agent execution (Phase 2, 4b, 5) via `Promise.all`
+- Agent Team coordination for Phase 5 (SendMessage, shared task list)
+- Token optimization (71% reduction — lazy loading, context isolation, streaming outputs)
+- Quality gates (architect 90%+ score, QA all-pass, tech lead ship/no-ship)
+- Interactive approval gates (Phase 3→4, 4b→5, 7→8)
+- Sprint git workflow (branch per sprint, commit per task, push per story)
+- 8 slash commands (`/bmad-init`, `/bmad-next`, `/bmad-status`, `/bmad-gate`, `/bmad-sprint`, `/bmad-track`, `/bmad-review`, `/bmad-help`)
+- Session tracker for orchestrator state persistence
+- PROJECT-SUMMARY generation for downstream agent context
+- Naming registry for cross-layer consistency
 
-**Implementation**:
-```markdown
-# New skill: bmad-help.md
-When user types /bmad-help:
-- Show current phase context
-- Suggest next actions based on project state
-- Allow follow-up questions: "What do I do after architecture?"
-- Provide workflow guidance
-```
+### v1.0.1 — Reliability & DX (2026-03-03)
 
-**Value**: Users can ask "what next?" at any time without reading full docs
+- **Auto-Recovery After Context Compaction** — 3-layer system:
+  - Layer 1: `CLAUDE.md` in user project with orchestrator role assignment
+  - Layer 2: `PreCompact` hook saves transcript context to session-tracker.md
+  - Layer 3: `SessionStart(compact)` hook injects role + state after compaction
+- **Centralized Git Helper** (`bmad-git.sh`) — DRY git workflow:
+  - `task-commit` — stage, commit, capture SHA, update story file automatically
+  - `story-push` — mark done, commit, push to sprint branch
+  - `sprint-start` / `sprint-merge` — branch lifecycle
+  - `status` / `update-tracker` — git status helpers
+  - Wired into all 4 developer agents (frontend, backend, database, mobile)
+- **Installer Update Mode** — `./install.sh --update` or `npx @bmad-code/agent-teams update`:
+  - Refreshes agents, commands, scripts, skills, templates
+  - Preserves project state (docs/, CLAUDE.md, workflow status, session tracker)
+  - Warns about outdated config files (settings.json, hooks.json)
+- **CLAUDE.md Deployment** — Created by both installer and `/bmad-init`
+- **Installer fixes** — Correct source paths for `.claude/scripts/`, accurate counts, safe project state handling
 
----
+### v1.0.2 — Design Prototyping & Mid-Impl Flexibility (2026-03-03)
 
-### 2. Quick Flow Workflows (Lightweight Projects)
+- **Frontend Design Prototyper Agent** (agent #15) — On-demand HTML/CSS/JS demo creation:
+  - Creates self-contained HTML prototypes in `docs/design-prototypes/`
+  - Maintains `docs/visual-identity-guide.md` with design tokens (colors, typography, spacing, component patterns)
+  - Reads UX wireframes for design consistency
+  - Spawned on-demand via `/bmad-design` command or orchestrator
+  - Uses sonnet model for cost-effective design work
+- **`/bmad-design` Slash Command** — Invoke the prototyper from any phase:
+  - Asks what to prototype if not specified
+  - Spawns prototyper agent, returns file path for browser preview
+- **Mid-Implementation Flexibility** — Orchestrator now handles ad-hoc changes during Phase 5:
+  - Ad-hoc tasks: Create and assign new tasks not in original stories
+  - Feature extensions: Expand existing stories with new tasks mid-sprint
+  - Design prototype requests: Spawn prototyper on-demand during implementation
+  - New architecture decisions: Create mid-implementation ADRs and notify developers
+- **Frontend Developer Visual Identity Integration** — Frontend dev now reads `docs/visual-identity-guide.md` for design token consistency
 
-**Current State**: Full 8-phase workflow only
-**Enhancement**: Add fast-track workflows for simple projects
+### v1.0.3 — Story Fix Cycles (2026-03-03)
 
-**Implementation**:
-```bash
-# New commands:
-/bmad-quick-spec — Quick specification (PRD + Architecture in one step)
-/bmad-quick-dev — Quick development (Solo dev agent handles all tracks)
-
-# New agent:
-.claude/agents/quick-flow-solo-dev.md
-  - Combines Frontend + Backend + Database roles
-  - Minimal documentation overhead
-  - For MVPs, prototypes, small features
-```
-
-**Value**: 80% faster for small projects (< 5 stories)
-
----
-
-### 3. Adaptive Complexity Scaling
-
-**Current State**: Same workflow depth for all projects
-**Enhancement**: Auto-adjust planning depth based on project size
-
-**Implementation**:
-```javascript
-// In bmad-init or orchestrator
-function determineComplexity(productBrief) {
-  const signals = {
-    userCount: productBrief.includes("million users") ? 3 : 1,
-    integrations: (productBrief.match(/integrate|API|third-party/gi) || []).length,
-    features: (productBrief.match(/feature|module|system/gi) || []).length
-  };
-
-  if (signals.features < 5 && signals.integrations < 2) return "SIMPLE";
-  if (signals.features < 15) return "MEDIUM";
-  return "COMPLEX";
-}
-
-// Use to determine:
-// SIMPLE → Quick Flow (2 phases: spec + dev)
-// MEDIUM → Standard Flow (8 phases)
-// COMPLEX → Enterprise Flow (+ research, tech writer, formal reviews)
-```
-
-**Value**: Don't over-engineer simple projects, don't under-plan complex ones
-
----
-
-### 4. Mid-Project Course Correction (`/bmad-correct-course`)
-
-**Current State**: Once started, workflow is linear
-**Enhancement**: Allow users to pivot mid-project
-
-**Implementation**:
-```markdown
-# New skill: bmad-correct-course.md
-When invoked:
-1. Read current project state (docs/project-tracker.md)
-2. Ask: "What changed?" (new requirements, scope reduction, pivot)
-3. Analyze impact on existing stories/epics
-4. Generate impact report
-5. Propose options:
-   - Update PRD and re-plan affected stories
-   - Create new epic for pivot
-   - Deprecate stories, mark as "Won't Do"
-6. Re-run affected phases (e.g., re-architect, re-sprint-plan)
-```
-
-**Value**: Real projects change — support agile adaptation
+- **Per-Story Code Review (Level 1)** — Optional Tech Lead lightweight review after each story completes during Phase 5:
+  - Orchestrator asks user at Phase 5 start whether to enable per-story reviews
+  - Tech Lead reviews only the story's files and commits (not full codebase)
+  - Returns Approved or Changes Requested, developer fixes, max 2 rounds
+- **User-Reported Bug Fixes (Level 2)** — Mid-sprint bug fix flow:
+  - User reports issue → orchestrator identifies story/track → spawns developer
+  - Logged in session tracker Decision Log
+- **QA Bug Fix Loop (Level 3)** — After Phase 6, bugs routed back to developers:
+  - Bugs grouped by Track field → one developer per track spawned in parallel
+  - QA re-tests fixed bugs only (not full test suite), max 2 rounds
+- **Tech Lead Fix Loop (Level 4)** — After Phase 8, action items routed to developers:
+  - P0/P1 action items extracted → developers fix → Tech Lead re-reviews
+  - Max 2 rounds, escalate to user if still failing
+- **Story Template Review & QA Section** — Stories now track review feedback and QA bugs inline:
+  - Review Feedback table (Round, Reviewer, Result, Issues, Fix Commit)
+  - QA Bugs table (Bug ID, Description, Severity, Fix Commit, Verified)
+  - New statuses: In Review, Changes Requested, QA Passed
+- **Developer Fix Request Handling** — All 4 developer agents (frontend, backend, database, mobile) can now handle fix requests from Tech Lead reviews and QA bug reports
+- **QA Re-Test Cycle** — QA engineer supports targeted re-testing of specific bugs without re-running full test plan
 
 ---
 
-### 5. Tech Writer Agent
+## Planned Features
 
-**Current State**: No dedicated documentation agent
-**Enhancement**: Add Tech Writer for user-facing docs
+### v1.1 — Quick Flow & Documentation
 
-**Implementation**:
-```markdown
-# New agent: .claude/agents/tech-writer.md
-Role: Creates end-user documentation (README, API docs, user guides)
+| # | Feature | Impact | Effort | Status |
+|---|---------|--------|--------|--------|
+| 1 | Quick Flow Workflows | High | Medium | Not started |
+| 2 | Tech Writer Agent | Medium | Low | Not started |
+| 3 | Adaptive Complexity Scaling | High | High | Not started |
 
-Workflow:
-- Phase 2: Create initial README from product-brief
-- Phase 6 (after QA): Write user guides, API reference
-- Phase 8: Generate deployment docs, troubleshooting guides
+#### Quick Flow Workflows
 
-Documents Created:
-- README.md (user-facing)
-- docs/api-reference.md
-- docs/user-guide.md
-- docs/troubleshooting.md
+Fast-track for small projects (< 5 stories). Skip heavy planning phases.
+
+```
+/bmad-quick-spec  — PRD + Architecture in one step
+/bmad-quick-dev   — Solo dev agent handles all tracks
 ```
 
-**Value**: Professional documentation without developer overhead
+New agent: `quick-flow-solo-dev.md` combining Frontend + Backend + Database roles.
+
+**Value**: 80% faster for MVPs, prototypes, small features.
+
+#### Tech Writer Agent
+
+Dedicated documentation agent for user-facing docs.
+
+```
+New agent: .claude/agents/tech-writer.md
+Outputs: README.md, docs/api-reference.md, docs/user-guide.md
+
+Triggered:
+  - Phase 2: Initial README from product brief
+  - Phase 6 (after QA): User guides, API reference
+  - Phase 8: Deployment docs, troubleshooting
+```
+
+#### Adaptive Complexity Scaling
+
+Auto-detect project size from product brief and adjust workflow depth.
+
+```
+SIMPLE  (< 5 features, < 2 integrations) → Quick Flow (2 phases)
+MEDIUM  (< 15 features)                  → Standard Flow (8 phases)
+COMPLEX (15+ features, enterprise)        → Enterprise Flow (+ research, tech writer)
+```
 
 ---
 
-## Priority 2: Research & Discovery Enhancements
+### v1.2 — Agility & Quality
 
-### 6. Research Modules (Phase 1)
+| # | Feature | Impact | Effort | Status |
+|---|---------|--------|--------|--------|
+| 4 | Mid-Project Course Correction | High | High | Not started |
+| 5 | Per-Story Code Review | High | Medium | **Done (v1.0.3)** |
+| 6 | Research Modules | Medium | Medium | Not started |
 
-**Current State**: Business Analyst creates product brief from user input
-**Enhancement**: Add research capabilities
+#### Mid-Project Course Correction (`/bmad-correct-course`)
 
-**Implementation**:
-```markdown
-# Extend Business Analyst agent with research workflows:
+Allow pivots mid-project: analyze impact on existing stories/epics, propose options (update PRD, create new epic, deprecate stories), re-run affected phases.
 
-/bmad-research-market
-  - WebSearch for competitor analysis
-  - Identify market trends
-  - Find existing solutions (learn from them)
+#### Per-Story Code Review — Completed in v1.0.3
 
-/bmad-research-domain
-  - WebSearch for domain terminology
-  - Understand industry standards (e.g., HIPAA for healthcare)
-  - Find domain-specific libraries/tools
+Moved to v1.0.3 as part of the Story Fix Cycles feature. Includes 4 levels of fix cycles: per-story review, user-reported bugs, QA bug loops, and Tech Lead fix loops.
 
-/bmad-research-technical
-  - WebSearch for tech stack options
-  - Compare frameworks (React vs Vue, Postgres vs MySQL)
-  - Find best practices, anti-patterns
-```
+#### Research Modules
 
-**Value**: Data-driven product brief instead of assumptions
+Add research capabilities to Phase 1:
+- `/bmad-research-market` — Competitor analysis via WebSearch
+- `/bmad-research-domain` — Industry standards, terminology
+- `/bmad-research-technical` — Framework comparisons, best practices
 
 ---
 
-### 7. Generate Project Context (`/bmad-context`)
+### v1.3 — Validation & Visualization
 
-**Current State**: Context is implicit in docs/
-**Enhancement**: Generate structured context for AI assistants
+| # | Feature | Impact | Effort | Status |
+|---|---------|--------|--------|--------|
+| 7 | Document Validation | Medium | Low | Not started |
+| 8 | Mermaid Diagram Generation | Low | Low | Not started |
+| 9 | Project Context Export | Medium | Low | Not started |
 
-**Implementation**:
-```markdown
-# New skill: bmad-context.md
-Output: docs/PROJECT-CONTEXT.md
+#### Document Validation (`/bmad-validate-doc`)
 
-Contains:
-- Tech stack summary
-- Key architecture decisions (from ADRs)
-- Naming conventions (from naming-registry.md)
-- Current sprint status
-- Active branches
-- Environment setup instructions
+Validate PRD, architecture, and stories against quality standards: required sections present, acceptance criteria testable, no ambiguous language, dependencies valid.
 
-Use Case:
-- Onboarding new developers
-- Resuming after context loss
-- Sharing with external AI assistants
-```
+#### Mermaid Diagrams (`/bmad-mermaid`)
 
-**Value**: One file explains entire project state
+Generate visual diagrams: system architecture (C4), database ERD, API flows, user flows, sprint workflow, git branching.
+
+#### Project Context Export (`/bmad-context`)
+
+Generate single-file project context for onboarding or sharing: tech stack, key decisions, naming conventions, current sprint status, environment setup.
 
 ---
 
-## Priority 3: Quality & Validation
+### v1.4 — Developer Experience
 
-### 8. Formal Code Review Workflow
-
-**Current State**: Tech Lead does final review (Phase 8)
-**Enhancement**: Add per-story code reviews
-
-**Implementation**:
-```markdown
-# New workflow: After dev completes story
-1. Developer marks story "Ready for Review"
-2. /bmad-code-review invokes Tech Lead agent
-3. Tech Lead reviews:
-   - All commits in story
-   - Naming registry compliance
-   - Security checklist
-   - Test coverage
-   - Architecture alignment
-4. Tech Lead comments in story file:
-   - ✅ Approved OR
-   - ⚠️ Changes Requested (with specific feedback)
-5. If changes requested, dev fixes and re-submits
-```
-
-**Value**: Catch issues early, not at final review
+| # | Feature | Impact | Effort | Status |
+|---|---------|--------|--------|--------|
+| 10 | Explain Concept | Low | Low | Not started |
+| 11 | Diataxis Documentation | Medium | High | Not started |
 
 ---
 
-### 9. Document Validation Workflow
+### v2.0 — Plugin/Module System
 
-**Current State**: No formal doc validation
-**Enhancement**: Validate documents against standards
+| # | Feature | Impact | Effort | Status |
+|---|---------|--------|--------|--------|
+| 12 | Plugin/Module System | High | Very High | Not started |
 
-**Implementation**:
-```markdown
-# New skill: bmad-validate-doc.md
-
-/bmad-validate-doc docs/prd.md
-  Checks:
-  - All PRD sections present
-  - Each feature has acceptance criteria
-  - No ambiguous language ("might", "could", "maybe")
-  - Personas are concrete (not generic)
-
-/bmad-validate-doc docs/architecture.md
-  Checks:
-  - Tech stack table complete
-  - All ADRs referenced
-  - Security section present
-  - Performance targets quantified (not "fast")
-
-/bmad-validate-doc docs/stories/STORY-NNN.md
-  Checks:
-  - User story format correct
-  - Acceptance criteria testable
-  - Dependencies valid (referenced stories exist)
-  - Tasks are atomic (1 commit each)
-```
-
-**Value**: Document quality gates prevent downstream issues
-
----
-
-## Priority 4: Developer Experience
-
-### 10. Mermaid Diagram Generation
-
-**Current State**: ASCII diagrams in architecture.md
-**Enhancement**: Generate Mermaid diagrams
-
-**Implementation**:
-```markdown
-# New skill: bmad-mermaid.md
-
-/bmad-mermaid architecture
-  Generates:
-  - System architecture diagram (C4 model)
-  - Database ERD
-  - API flow diagrams
-
-/bmad-mermaid workflow
-  Generates:
-  - User flow diagrams from ux-wireframes.md
-  - Sprint workflow visualization
-  - Git branching strategy diagram
-
-Output: docs/diagrams/*.mmd files
-```
-
-**Value**: Visual diagrams improve comprehension
-
----
-
-### 11. Explain Concept Workflow
-
-**Current State**: No concept explanation capability
-**Enhancement**: Add on-demand explanations
-
-**Implementation**:
-```markdown
-# New skill: bmad-explain.md
-
-/bmad-explain "dependency injection"
-  - Provides simple explanation
-  - Shows code example from project
-  - Links to architecture.md if relevant
-
-/bmad-explain "why we use Zod for validation"
-  - Reads ADRs for context
-  - Explains decision rationale
-  - Shows usage example from codebase
-```
-
-**Value**: Self-documenting project for new team members
-
----
-
-## Priority 5: Documentation System
-
-### 12. Diátaxis Documentation Framework
-
-**Current State**: Flat docs/ structure
-**Enhancement**: Organize docs by user intent
-
-**Implementation**:
-```bash
-docs/
-├── tutorials/          # Learning-oriented
-│   ├── getting-started.md
-│   ├── first-feature.md
-│   └── deploying.md
-├── how-to/            # Task-oriented
-│   ├── add-new-agent.md
-│   ├── customize-workflow.md
-│   └── integrate-mcp.md
-├── reference/         # Information-oriented
-│   ├── api-reference.md
-│   ├── agent-reference.md
-│   └── command-reference.md
-└── explanation/       # Understanding-oriented
-    ├── why-bmad.md
-    ├── architecture-decisions.md
-    └── workflow-philosophy.md
-```
-
-**Value**: Users find docs faster based on their need
-
----
-
-## Priority 6: Modularity & Extensions
-
-### 13. Plugin/Module System
-
-**Current State**: Monolithic agent system
-**Enhancement**: Pluggable modules
-
-**Implementation**:
-```yaml
-# package.json extensions
-{
-  "name": "@bmad-code/agent-teams",
-  "peerDependencies": {
-    "@bmad-code/test-architect": "^1.0.0",  # Optional module
-    "@bmad-code/game-dev-studio": "^1.0.0", # Optional module
-    "@bmad-code/creative-suite": "^1.0.0"   # Optional module
-  }
-}
-
-# Module registration: bmad-modules.yaml
-modules:
-  - name: test-architect
-    agents: [test-architect]
-    skills: [test-generation, coverage-analysis]
-    phase: 6
-    enabled: false
-
-  - name: game-dev-studio
-    agents: [game-designer, level-designer]
-    skills: [unity, unreal, godot]
-    phase: 5
-    enabled: false
-```
-
-**Value**: Users install only what they need
+Pluggable modules for specialized workflows:
+- `@bmad-code/test-architect` — Advanced testing strategies
+- `@bmad-code/game-dev-studio` — Game development agents
+- `@bmad-code/creative-suite` — Design-focused workflows
 
 ---
 
 ## Implementation Priority Matrix
 
-| Feature | Impact | Effort | Priority | Target Version |
-|---------|--------|--------|----------|----------------|
-| Interactive Help System | High | Medium | P1 | v1.1 |
-| Quick Flow Workflows | High | Medium | P1 | v1.1 |
-| Tech Writer Agent | Medium | Low | P1 | v1.1 |
-| Adaptive Complexity Scaling | High | High | P2 | v1.2 |
-| Course Correction | High | High | P2 | v1.2 |
-| Research Modules | Medium | Medium | P2 | v1.2 |
-| Code Review Workflow | High | Medium | P2 | v1.2 |
-| Document Validation | Medium | Low | P3 | v1.3 |
-| Mermaid Diagrams | Low | Low | P3 | v1.3 |
-| Project Context | Medium | Low | P3 | v1.3 |
-| Explain Concept | Low | Low | P4 | v1.4 |
-| Diátaxis Docs | Medium | High | P4 | v1.4 |
-| Module System | High | Very High | P5 | v2.0 |
-
----
-
-## Next Steps
-
-1. **Review this proposal** with stakeholders
-2. **Create GitHub issues** for P1 features
-3. **Prototype Quick Flow** first (highest ROI)
-4. **Update ROADMAP.md** with approved features
-5. **Create feature branches** for parallel development
+| Feature | Impact | Effort | Version | Status |
+|---------|--------|--------|---------|--------|
+| Interactive Help | High | Medium | v1.0 | **Done** |
+| Auto-Recovery (hooks) | High | Medium | v1.0.1 | **Done** |
+| Centralized Git Helper | Medium | Medium | v1.0.1 | **Done** |
+| Installer Update Mode | Medium | Medium | v1.0.1 | **Done** |
+| Design Prototyper Agent | Medium | Medium | v1.0.2 | **Done** |
+| Mid-Impl Flexibility | High | Medium | v1.0.2 | **Done** |
+| Story Fix Cycles | High | Medium | v1.0.3 | **Done** |
+| Quick Flow Workflows | High | Medium | v1.1 | Planned |
+| Tech Writer Agent | Medium | Low | v1.1 | Planned |
+| Adaptive Complexity | High | High | v1.1 | Planned |
+| Course Correction | High | High | v1.2 | Planned |
+| Per-Story Code Review | High | Medium | v1.0.3 | **Done** |
+| Research Modules | Medium | Medium | v1.2 | Planned |
+| Document Validation | Medium | Low | v1.3 | Planned |
+| Mermaid Diagrams | Low | Low | v1.3 | Planned |
+| Project Context | Medium | Low | v1.3 | Planned |
+| Explain Concept | Low | Low | v1.4 | Planned |
+| Diataxis Docs | Medium | High | v1.4 | Planned |
+| Module System | High | Very High | v2.0 | Planned |
 
 ---
 
 ## References
 
 - Original BMAD-METHOD: https://github.com/bmad-code-org/BMAD-METHOD
-- BMAD Docs: https://docs.bmad-method.org
-- Diátaxis Framework: https://diataxis.fr/
+- Diataxis Framework: https://diataxis.fr/

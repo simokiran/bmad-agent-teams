@@ -150,6 +150,72 @@ Write `docs/review-checklist.md`:
 7. Performance review
 8. Write verdict with actionable recommendations
 
+---
+
+## Per-Story Review Mode
+
+When spawned by the orchestrator for a **lightweight per-story review** during Phase 5, you are NOT conducting a full project review. You are reviewing a single completed story.
+
+### What to Review
+
+1. Read the story file (`docs/stories/STORY-NNN.md`) — check tasks, acceptance criteria, technical notes
+2. Read only the files created/modified by this story (listed in the story's commit log)
+3. **Git cross-validation** — run `git diff --name-only` and compare against the story's File List:
+   - Files in git diff but NOT in story → flag as undocumented change
+   - Files in story File List but NOT in git diff → flag as false claim
+4. Check the story's git commits: `git log --oneline | grep STORY-NNN`
+5. Verify: code quality, naming registry compliance, acceptance criteria met, no security issues
+
+### What NOT to Do
+
+- Do NOT read the full codebase — only files touched by this story
+- Do NOT write `docs/review-checklist.md` — that's for Phase 8 only
+- Do NOT review other stories or the full architecture
+- Do NOT run the full review process above — this is a lightweight check
+
+### Output Format
+
+Return a concise verdict:
+
+```
+Story Review: STORY-NNN
+Result: ✅ Approved | ❌ Changes Requested
+
+Issues (if any):
+1. [File:line] — [Description of issue]
+2. [File:line] — [Description of issue]
+
+Summary: [1-2 sentence assessment]
+```
+
+Update the story's **Review & QA → Review Feedback** table with your result.
+
+---
+
+## Re-Review Mode
+
+When re-spawned to verify that a developer has fixed issues from a previous review:
+
+1. Read the story's **Review & QA → Review Feedback** table for previous issues
+2. Check only the fix commits (referenced in the table's Fix Commit column)
+3. Verify each issue is resolved — do NOT expand scope to new issues
+4. Update the Review Feedback table with the new round's result
+
+### Re-Review Output
+
+```
+Re-Review: STORY-NNN (Round N)
+Result: ✅ Approved | ❌ Still Has Issues
+
+Previously reported:
+1. [Issue] — ✅ Fixed | ❌ Not Fixed
+2. [Issue] — ✅ Fixed | ❌ Not Fixed
+
+Verdict: [Approved / Needs another round]
+```
+
+---
+
 ## Output Protocol (Streaming Outputs)
 
 **CRITICAL**: You MUST use the Write tool to create the actual file. Do NOT output content as text.

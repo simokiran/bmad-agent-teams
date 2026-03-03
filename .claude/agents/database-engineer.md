@@ -76,29 +76,47 @@ Read `docs/skills-required.md` to see if any Claude Code skills can help with th
 #    - Ensure table/column names match naming-registry.md Section 1
 #    - Update naming-registry.md with new schema elements
 
-# c) Commit with story-prefixed message:
-git add -A
-git commit -m "[STORY-NNN] task: <task description>"
-
-# c) Capture SHA and update story file:
-COMMIT_SHA=$(git rev-parse --short HEAD)
-TIMESTAMP=$(date -u +"%Y-%m-%d %H:%M UTC")
-
-# d) Update Git Task Tracking table:
-#    | 1 | Create users table migration | ✅ | `f6g7h8i` | 2025-02-19 14:15 UTC |
-
-# e) Update Commit Log
+# c) Commit and record SHA using the git helper:
+.claude/scripts/bmad-git.sh task-commit STORY-NNN "task description" TASK_NUMBER
+# This will: stage all changes, commit, capture SHA, update the story file's
+# Git Task Tracking table, Commit Log, and Git Summary automatically.
 ```
 
 ### 4. After ALL tasks done:
 ```bash
-git add docs/stories/STORY-NNN.md
-git commit -m "[STORY-NNN] complete: <story title>"
-git push origin sprint/sprint-1
+# Mark story as done, commit, and push using the git helper:
+.claude/scripts/bmad-git.sh story-push STORY-NNN "Story Title"
+# This will: update story status to Done, commit story file, push to sprint branch,
+# and update the Git Summary (Total Commits, Last Commit, Pushed status).
 ```
 
 ### 5. CRITICAL: Notify team lead via SendMessage
 Database stories often unblock Backend and Frontend tracks. Tell the orchestrator immediately so blocked stories can begin.
+
+---
+
+## Handling Fix Requests
+
+### From Tech Lead Review
+
+When re-spawned to fix issues from a Tech Lead per-story review:
+
+1. Read your story file's **Review & QA → Review Feedback** table for the specific issues
+2. Fix each issue — keep changes minimal, only what's needed to resolve the reported problem
+3. Commit each fix: `.claude/scripts/bmad-git.sh task-commit STORY-NNN "fix: [issue description]" FIX_ROUND`
+4. Update the story's Review Feedback table with the fix commit SHA
+5. Do NOT push — the orchestrator coordinates push after review cycle completes
+
+### From QA Bug Report
+
+When re-spawned to fix bugs found by QA:
+
+1. Read `docs/test-plan.md` Bug Report section for bugs assigned to your track
+2. For each bug, read the Steps to Reproduce and Root Cause
+3. Fix the bug — minimal changes only
+4. Commit: `.claude/scripts/bmad-git.sh task-commit STORY-NNN "fix: BUG-NNN [description]" BUG_FIX`
+5. Update the story's **Review & QA → QA Bugs** table with the fix commit SHA
+6. Do NOT push — the orchestrator coordinates push after QA re-test
 
 ---
 

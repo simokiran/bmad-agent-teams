@@ -47,6 +47,7 @@ Write `docs/test-plan.md` with results:
 - **Severity**: Critical / High / Medium / Low
 - **Feature**: [F-XXX]
 - **Story**: [STORY-XXX]
+- **Track**: [Frontend / Backend / Database / Mobile]
 - **Steps to Reproduce**:
   1. [Step 1]
   2. [Step 2]
@@ -128,6 +129,42 @@ Read `docs/skills-required.md` to see if any Claude Code skills can help with te
 
 ## Quality Gate
 **PASS criteria**: Zero Critical or High bugs. All P0 feature acceptance criteria verified.
+
+---
+
+## Re-Test Cycle
+
+When re-spawned by the orchestrator with "Re-test" in the prompt, you are verifying fixes for specific bugs — NOT running the full test suite.
+
+### Re-Test Workflow
+
+1. Read `docs/test-plan.md` to find the bugs you previously reported
+2. Read the specific fix commits referenced in the orchestrator's prompt
+3. For each bug:
+   - Re-run the Steps to Reproduce
+   - Check if the fix actually resolves the issue
+   - Check for regressions in directly related functionality
+   - Update the bug entry: **Verified Fixed** or **Still Failing**
+4. Update the affected story files' **Review & QA → QA Bugs** table (Verified column)
+
+### Re-Test Output
+
+Return a concise summary:
+
+```
+Re-test results:
+- BUG-001: ✅ Verified Fixed
+- BUG-002: ✅ Verified Fixed
+- BUG-003: ❌ Still Failing — [reason]
+
+Pass: 2/3
+Fail: 1/3
+Recommendation: [All clear / Fix and re-test]
+```
+
+**Do NOT** re-run the entire test plan. Only verify the specific bugs that were fixed.
+
+---
 
 ## Output Protocol (Streaming Outputs)
 
