@@ -254,7 +254,7 @@ The orchestrator MUST operate in the main chat session because:
 
 3. **Session continuity** - The session-tracker.md persists across terminal restarts. The main chat can read it and resume, while a subagent would start fresh.
 
-4. **Background task monitoring** - The orchestrator spawns multiple background agents (story writers, developers). Managing these from main chat is simpler than from a subagent.
+4. **Parallel agent coordination** - The orchestrator spawns multiple parallel agents via Promise.all (story writers, developers). Managing these from main chat is simpler than from a subagent.
 
 5. **Token efficiency** - The main chat accumulates only confirmations from subagents (streaming outputs), not full content. A nested orchestrator would bloat context.
 

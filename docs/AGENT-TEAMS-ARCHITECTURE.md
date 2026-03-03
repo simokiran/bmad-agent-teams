@@ -541,6 +541,47 @@ Speedup: 29% faster
 
 ---
 
+## Testing Findings: Parallel Agent Spawn Patterns
+
+### What Was Tested (Real Sprint Execution)
+
+**Session 13 — Parallel + Worktree (standalone Task): FAILED**
+- Spawned 4 parallel agents with `isolation: "worktree"` as standalone `Task()` calls
+- All 4 agents hit Edit/Write tool permission denied errors in worktrees
+- Partial work saved in worktrees but not committed
+
+**Session 14 — Manual Recovery + bypassPermissions Attempt: FAILED**
+- Tried worktree agents with `mode: "bypassPermissions"` but WITHOUT `TeamCreate`
+- Edit/Write tools still failed
+- Had to manually implement all stories without agents
+
+**Session 16 — TeamCreate + Worktree + bypassPermissions: SUCCESS**
+- Created Agent Team (`TeamCreate`) named "sprint-2" with 3 parallel developers
+- Used `team_name` + `isolation: "worktree"` + `mode: "bypassPermissions"` together
+- All 3 agents worked, completing 24 stories in parallel:
+  - frontend-search: 5 stories, 10 commits
+  - frontend-carousel: 11 stories, 13 commits
+  - frontend-mobile: 8 stories, 13 commits
+
+### Key Finding
+
+For parallel agents that write code, you MUST use ALL FOUR parameters together:
+1. `TeamCreate({ team_name: "sprint-N" })` — create team first
+2. `team_name: "sprint-N"` — on each Task call
+3. `isolation: "worktree"` — each agent gets isolated repo copy
+4. `mode: "bypassPermissions"` — agents can Edit/Write without prompts
+
+Missing any one of these causes Edit/Write permission failures.
+
+### Status: NEEDS FURTHER TESTING
+
+- [ ] Reproduce the exact failure/success conditions
+- [ ] Test whether Phase 4b (story writers) also needs worktree isolation
+- [ ] Test Phase 2 (PM + UX) without worktree (they write to separate files)
+- [ ] Update orchestrator.md and bmad-sprint.md spawn patterns after validation
+
+---
+
 ## Conclusion: Agent Teams Are Core
 
 **Every new feature MUST leverage agent teams:**

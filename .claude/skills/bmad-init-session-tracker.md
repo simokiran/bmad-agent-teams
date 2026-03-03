@@ -156,25 +156,24 @@ Skill("bmad-init-session-tracker")
 
 **After initialization, the orchestrator MUST:**
 
-1. **Update tracker after every agent spawn**:
+1. **Update tracker after every phase completion**:
    ```typescript
-   const task = await Task({ ..., run_in_background: true });
-
-   // Record Task ID immediately
+   // After parallel agents complete (via Promise.all)
    await Edit({
      file_path: "docs/session-tracker.md",
-     old_string: "Backend Developer: [🔴 Background Task ID: task_xxx]",
-     new_string: `Backend Developer: [🔴 Background Task ID: ${task.task_id}]`
+     old_string: "Backend Developer: [⏳ Running]",
+     new_string: "Backend Developer: [✅ Complete]"
    });
    ```
 
-2. **Update tracker when agent completes**:
+2. **Use Promise.all for parallel phases (NOT run_in_background)**:
    ```typescript
-   await Edit({
-     file_path: "docs/session-tracker.md",
-     old_string: `Backend Developer: [🔴 Background Task ID: ${task_id}]`,
-     new_string: "Backend Developer: [✅ Complete]"
-   });
+   // Parallel agents — spawn all in one call
+   await Promise.all([
+     Task({ subagent_type: "Product Manager", ... }),
+     Task({ subagent_type: "UX Designer", ... })
+   ]);
+   // Update tracker after both complete
    ```
 
 3. **Update "Next Action" before each step**:

@@ -1,357 +1,270 @@
 # BMad Agent Teams - Project Status
 
-**Last Updated**: February 19, 2024
-**Current Version**: 1.0.0
-**Status**: ✅ Production Ready
+**Last Updated**: March 2, 2026
+**Current Version**: 1.4.0
+**Status**: Active Development — Core functional, optimization in progress
 
 ---
 
-## 📊 Project Overview
+## Project Overview
 
-This is the **BMad Agent Teams** plugin for Claude Code - a complete implementation of the BMad Method that transforms a single Claude Code session into a 12-agent software development team.
+This is the **BMad Agent Teams** plugin for Claude Code — a complete implementation of the BMad Method that transforms a single Claude Code session into a 15-agent software development team. The orchestrator runs in the main chat session and spawns specialist agents as subprocesses through an 8-phase workflow.
 
 ### Quick Stats
 
-- **Total Files**: 51
-- **Lines of Code**: ~5,500
-- **Agents**: 12
+- **Total Commits**: 42
+- **Agent Definitions**: 15 (7,634 lines across agents/commands/skills)
+- **Development Docs**: 11 files (4,920 lines)
 - **Commands**: 8
-- **Templates**: 4
-- **Documentation Pages**: 8
-- **Status**: Ready for npm publishing
+- **Skills**: 2
+- **Phases**: 8 (with parallel execution in Phases 2, 4b, and 5)
 
 ---
 
-## 📁 Complete File Structure
+## File Structure
 
 ```
-bmad-agent-teams/                 # Root directory (THE PLUGIN)
+bmad-agent-teams/
 │
-├── .claude/                      # Claude Code configuration
-│   ├── agents/                   # 12 agent definitions
-│   │   ├── orchestrator.md       # ✅ Team lead, coordinates all agents
-│   │   ├── analyst.md            # ✅ Phase 1: Business analysis
-│   │   ├── product-manager.md    # ✅ Phase 2: PRD creation
-│   │   ├── ux-designer.md        # ✅ Phase 2: UX wireframes
-│   │   ├── architect.md          # ✅ Phase 3: Technical design
-│   │   ├── scrum-master.md       # ✅ Phase 4: Epic & sprint planning
-│   │   ├── frontend-developer.md # ✅ Phase 5: UI implementation
-│   │   ├── backend-developer.md  # ✅ Phase 5: API & logic
-│   │   ├── database-engineer.md  # ✅ Phase 5: Schema & queries
-│   │   ├── qa-engineer.md        # ✅ Phase 6: Testing
-│   │   ├── devops-engineer.md    # ✅ Phase 7: Deployment
-│   │   └── tech-lead.md          # ✅ Phase 8: Final review
+├── .claude/
+│   ├── agents/                        # 15 agent definitions
+│   │   ├── orchestrator.md            # ✅ Team lead (main chat role)
+│   │   ├── orchestrator-token-optimization.md  # ✅ Token optimization variant
+│   │   ├── analyst.md                 # ✅ Phase 1: Business analysis
+│   │   ├── product-manager.md         # ✅ Phase 2: PRD creation
+│   │   ├── ux-designer.md             # ✅ Phase 2: UX wireframes
+│   │   ├── architect.md               # ✅ Phase 3: Technical design
+│   │   ├── scrum-master.md            # ✅ Phase 4: Epic & sprint planning
+│   │   ├── story-writer.md            # ✅ Phase 4b: Story creation (parallel)
+│   │   ├── frontend-developer.md      # ✅ Phase 5: UI implementation
+│   │   ├── backend-developer.md       # ✅ Phase 5: API & logic
+│   │   ├── database-engineer.md       # ✅ Phase 5: Schema & queries
+│   │   ├── mobile-developer.md        # ✅ Phase 5: Mobile app
+│   │   ├── qa-engineer.md             # ✅ Phase 6: Testing
+│   │   ├── devops-engineer.md         # ✅ Phase 7: Deployment
+│   │   └── tech-lead.md               # ✅ Phase 8: Final review
 │   │
-│   ├── commands/                 # 8 slash commands
-│   │   ├── bmad-init.md          # ✅ Initialize project
-│   │   ├── bmad-status.md        # ✅ Show current phase
-│   │   ├── bmad-next.md          # ✅ Advance to next phase
-│   │   ├── bmad-gate.md          # ✅ Run quality gate
-│   │   ├── bmad-sprint.md        # ✅ Begin sprint
-│   │   ├── bmad-track.md         # ✅ Project dashboard
-│   │   ├── bmad-review.md        # ✅ Final review
-│   │   └── bmad-help.md          # ✅ Contextual help
+│   ├── commands/                      # 8 slash commands
+│   │   ├── bmad-init.md               # ✅ Initialize project
+│   │   ├── bmad-status.md             # ✅ Show current phase
+│   │   ├── bmad-next.md               # ✅ Advance to next phase
+│   │   ├── bmad-gate.md               # ✅ Run quality gate
+│   │   ├── bmad-sprint.md             # ✅ Begin sprint execution
+│   │   ├── bmad-track.md              # ✅ Project dashboard
+│   │   ├── bmad-review.md             # ✅ Final review
+│   │   └── bmad-help.md               # ✅ Contextual help
 │   │
-│   └── settings.json             # ✅ Agent Teams config
+│   ├── skills/                        # 2 auto-run skills
+│   │   ├── bmad-generate-summary.md   # ✅ Session summary generation
+│   │   └── bmad-init-session-tracker.md # ✅ Session tracker initialization
+│   │
+│   └── settings.json                  # ✅ Agent Teams config
 │
-├── templates/                    # Document templates
-│   ├── product-brief.md          # ✅ Product brief template
-│   ├── epic.md                   # ✅ Epic template
-│   ├── story.md                  # ✅ Story template (with git tracking)
-│   └── adr.md                    # ✅ Architecture Decision Record template
+├── docs/                              # Plugin development documentation
+│   ├── AGENT-TEAMS-ARCHITECTURE.md    # ✅ Agent Teams design + testing findings
+│   ├── ARCHITECTURE.md                # ✅ Three-level tracking architecture
+│   ├── COMPARISON-WITH-ORIGINAL.md    # ✅ BMad original vs Agent Teams
+│   ├── CONTEXT-ISOLATION-STRATEGY.md  # ✅ Context isolation design
+│   ├── ENHANCEMENT-ROADMAP.md         # ✅ Enhancement priorities
+│   ├── ORCHESTRATOR-OPTIMIZATION-DEPLOYMENT.md # ✅ Deployment guide
+│   ├── PHASE-3-OPTIMIZATIONS.md       # ✅ Phase 3 optimization notes
+│   ├── README.md                      # ✅ Docs folder index
+│   ├── SESSION-TRACKER.md             # ✅ Session tracker template
+│   ├── SESSION-TRACKING-IMPLEMENTATION.md # ✅ Session tracking design
+│   └── TOKEN-OPTIMIZATION.md          # ✅ Token optimization analysis
 │
-├── scripts/                      # Helper scripts
-│   ├── bmad-git.sh               # ✅ Git automation
-│   └── bmad-orchestrate.sh       # ✅ Orchestration helpers
-│
-├── docs/                         # Plugin development docs
-│   ├── architecture-diagram.mermaid  # ✅ Workflow visualization
-│   └── README.md                 # ✅ Docs folder explanation
-│
-├── cli.js                        # ✅ CLI entry point
-├── index.js                      # ✅ Module API
-├── install.sh                    # ✅ Installation script
-├── package.json                  # ✅ npm package config
-│
-├── .gitignore                    # ✅ Git ignore rules
-├── .npmignore                    # ✅ npm publish exclude rules
-│
-├── README.md                     # ✅ Main user documentation
-├── USAGE-GUIDE.md                # ✅ Detailed usage guide
-├── WORKED-EXAMPLE.md             # ✅ Complete example walkthrough
-├── ADVANCED-CONFIG.md            # ✅ Advanced configuration
-├── BMAD-COMPLETE-REFERENCE.md    # ✅ Full reference (5,041 lines)
-├── CLAUDE.md                     # ✅ Project context template
-│
-├── CHANGELOG.md                  # ✅ Version history
-├── DEVELOPMENT.md                # ✅ Developer guide
-├── ROADMAP.md                    # ✅ Future plans
-├── CONTRIBUTING.md               # ✅ Contribution guidelines
-├── PROJECT-STATUS.md             # ✅ This file
-├── LICENSE                       # ✅ MIT license
-│
-└── README-OLD.md                 # 🗑️ Backup (can be deleted)
+├── README.md                          # ✅ Main user documentation
+├── CLAUDE.md                          # ✅ Project context + meta-instructions
+├── PROJECT-STATUS.md                  # ✅ This file
+├── package.json                       # ✅ npm package config
+├── install.sh                         # ✅ Installation script
+├── cli.js                             # ✅ CLI entry point
+├── index.js                           # ✅ Module API
+└── LICENSE                            # ✅ MIT license
 ```
 
 ---
 
-## ✅ Completion Status
+## Version History
 
-### Core Features (12/12)
+### v1.4.0 — Parallel Spawn Fix (March 2, 2026)
 
-- [x] **Orchestrator Agent** - Team lead coordination
-- [x] **Business Analyst** - Requirements discovery
-- [x] **Product Manager** - PRD creation
-- [x] **UX Designer** - Wireframes & user flows
-- [x] **System Architect** - Technical design
-- [x] **Scrum Master** - Epic & sprint planning
-- [x] **Frontend Developer** - UI implementation
-- [x] **Backend Developer** - API & business logic
-- [x] **Database Engineer** - Schema & migrations
-- [x] **QA Engineer** - Testing & validation
-- [x] **DevOps Engineer** - Deployment configs
-- [x] **Tech Lead** - Final review & ship decision
+**Fixed**:
+- **Critical**: Replaced all `run_in_background: true` agent spawns with `Promise.all` pattern across orchestrator, bmad-next, and session tracker
+  - Root cause: Background agents cannot request interactive permissions (Edit, Bash, Write fail silently)
+  - Affected: Phase 2 (PM + UX), Phase 4b (Story Writers), Phase 5 (Developers)
+  - Fix: `await Promise.all([Task(...), Task(...)])` in foreground mode
+- Added explicit Write tool instructions to scrum-master and tech-lead agents
+
+### v1.3.0 — Session Tracking & Compaction Recovery (February 2026)
+
+**Added**:
+- Context compaction detection and tracking in session tracker
+- Three-level tracking: session-tracker (orchestrator), project-tracker (team), story files (individual)
+- Post-compaction recovery protocol in orchestrator
+- `bmad-init-session-tracker` skill for automatic initialization
+
+### v1.2.0 — Orchestrator-Driven Architecture (February 2026)
+
+**Changed**:
+- Rewrote `bmad-sprint` as executable orchestrator instructions (not subagent spawn)
+- Implemented orchestrator-driven `bmad-next` (main chat assumes orchestrator role)
+- Implemented orchestrator-driven `bmad-init`
+- Rewritten Phase 5 to use Agent Teams with `TeamCreate` for coordination
+
+**Fixed**:
+- Critical file-writing bug in spawned agents
+- Interactive approval mode for phase gates
+- Simplified orchestrator spawn prompts to respect agent autonomy
+
+### v1.1.0 — Agent Expansion (February 2026)
+
+**Added**:
+- Story Writer agent (parallel story creation, 1 per epic)
+- Mobile Developer agent (13th → 15th agent with token optimization variant)
+- Orchestrator token optimization variant
+- Hooks for autonomous agent file writes
+- Manual approval workaround for spawned agent permissions
+
+### v1.0.0 — Initial Release (February 2026)
+
+- 12 core agents, 8 commands, 4 templates
+- Full 8-phase workflow
+- npm package structure with CLI
+- Comprehensive documentation
+
+---
+
+## Completion Status
+
+### Agents (15/15)
+
+- [x] **Orchestrator** — Main chat team lead coordination
+- [x] **Orchestrator (Token Optimized)** — Reduced-token variant
+- [x] **Business Analyst** — Phase 1: Requirements discovery
+- [x] **Product Manager** — Phase 2: PRD creation
+- [x] **UX Designer** — Phase 2: Wireframes & user flows
+- [x] **System Architect** — Phase 3: Technical design + ADRs
+- [x] **Scrum Master** — Phase 4: Epic & sprint planning
+- [x] **Story Writer** — Phase 4b: Story creation (parallel, 1 per epic)
+- [x] **Frontend Developer** — Phase 5: UI implementation
+- [x] **Backend Developer** — Phase 5: API & business logic
+- [x] **Database Engineer** — Phase 5: Schema & migrations
+- [x] **Mobile Developer** — Phase 5: Mobile app development
+- [x] **QA Engineer** — Phase 6: Testing & validation
+- [x] **DevOps Engineer** — Phase 7: Deployment configs
+- [x] **Tech Lead** — Phase 8: Final review & ship decision
 
 ### Commands (8/8)
 
-- [x] `/bmad-init` - Initialize project structure
-- [x] `/bmad-status` - Show current phase
-- [x] `/bmad-next` - Advance to next phase
-- [x] `/bmad-gate` - Run quality gate check
-- [x] `/bmad-sprint` - Begin implementation sprint
-- [x] `/bmad-track` - Project tracker dashboard
-- [x] `/bmad-review` - Trigger final review
-- [x] `/bmad-help` - Contextual help
+- [x] `/bmad-init` — Initialize project structure
+- [x] `/bmad-status` — Show current phase
+- [x] `/bmad-next` — Advance to next phase (orchestrator-driven)
+- [x] `/bmad-gate` — Run quality gate check
+- [x] `/bmad-sprint` — Begin implementation sprint (Agent Teams)
+- [x] `/bmad-track` — Project tracker dashboard
+- [x] `/bmad-review` — Trigger final review
+- [x] `/bmad-help` — Contextual help
 
-### Templates (4/4)
+### Skills (2/2)
 
-- [x] Product Brief template
-- [x] Epic template
-- [x] Story template (with git tracking)
-- [x] ADR template
+- [x] `bmad-generate-summary` — Session summary generation
+- [x] `bmad-init-session-tracker` — Auto-initialize session tracker on project start
 
-### Documentation (9/9)
+### Key Capabilities
 
-- [x] README.md - User-facing documentation
-- [x] USAGE-GUIDE.md - Detailed usage
-- [x] WORKED-EXAMPLE.md - Example walkthrough
-- [x] ADVANCED-CONFIG.md - Advanced config
-- [x] CHANGELOG.md - Version history
-- [x] DEVELOPMENT.md - Developer guide
-- [x] ROADMAP.md - Future plans
-- [x] CONTRIBUTING.md - Contribution guide
-- [x] BMAD-COMPLETE-REFERENCE.md - Full reference
+1. **Orchestrator-Driven Architecture** — Main chat assumes orchestrator role, spawns specialists as subagents. No nested orchestrator subprocess.
 
-### Infrastructure (5/5)
+2. **Parallel Agent Execution** — Phases 2, 4b, and 5 use `Promise.all` for true parallel agent spawns with interactive permissions intact.
 
-- [x] npm package structure
-- [x] CLI (npx support)
-- [x] Installation script
-- [x] Git ignore rules
-- [x] npm publish config
+3. **Document-Driven Relay** — Each agent produces artifacts that feed the next agent. Documents ARE the persistent context.
+
+4. **Token Optimization** — 71% reduction (846k → 241k tokens) through lazy loading, context isolation, streaming outputs, and deduplication.
+
+5. **Session Tracking & Recovery** — Persistent `docs/session-tracker.md` survives context compaction. Orchestrator reads it to resume from exact position.
+
+6. **Quality Gates** — Solutioning Gate (90% architecture completeness), QA Gate (all tests pass), Ship/No-Ship Gate (Tech Lead verdict).
+
+7. **Git Integration** — One commit per task, SHA tracking in story files, auto-push on story completion, sprint branch workflow.
 
 ---
 
-## 🎯 Key Capabilities
+## Known Limitations
 
-### ✅ What Works Now
+### Active Issues
 
-1. **Full 8-Phase Workflow**
-   - Phase 1: Discovery
-   - Phase 2: Planning (PM + UX in parallel)
-   - Phase 3: Architecture (with 90% quality gate)
-   - Phase 4: Epic Creation
-   - Phase 4b: Story Writing (parallel - 1 agent per epic)
-   - Phase 5: Implementation (3 devs in parallel)
-   - Phase 6: QA Testing
-   - Phase 7: Deployment Planning
-   - Phase 8: Final Review
+1. **Worktree + Permissions Pattern** — Testing in progress. The combination `TeamCreate + team_name + isolation: "worktree" + mode: "bypassPermissions"` succeeded in Session 16 (24 stories, 3 parallel agents), but standalone `Task()` with `isolation: "worktree"` fails (Edit/Write denied). Needs further validation before encoding into workflow files. See `docs/AGENT-TEAMS-ARCHITECTURE.md` for test results.
 
-2. **Epic-Story Hierarchy**
-   - PRD features → Epics → Stories
-   - Clear acceptance criteria
-   - Task-level tracking
+2. **Agent Teams Feature Flag** — Still requires `CLAUDE_AGENT_TEAMS=true` environment variable (experimental feature in Claude Code).
 
-3. **Git Integration**
-   - One commit per task
-   - SHA tracking in story files
-   - Auto-push on story completion
-   - Sprint branch workflow
+3. **No Automated Tests** — Plugin relies on manual end-to-end testing in real projects.
 
-4. **Quality Gates**
-   - Solutioning Gate (90% architecture completeness)
-   - QA Gate (all tests pass)
-   - Ship/No-Ship Gate (Tech Lead verdict)
+4. **Single Sprint Scope** — Multi-sprint support not yet implemented.
 
-5. **Installation**
-   - `npx @bmad-code/agent-teams install`
-   - Manual installation via `install.sh`
-   - Supports `--yes` and `--force` flags
+### By Design (Not Issues)
+
+- Document-driven (agents don't share memory) — intentional for context isolation
+- Sequential phases with gates — enforces quality
+- Orchestrator in main chat — enables user interaction and session persistence
 
 ---
 
-## 🚧 Known Limitations
+## Testing Status
 
-### Current Constraints
+### Real-World Test Results
 
-1. **Requires Claude Code CLI** - Not standalone
-2. **Agent Teams Experimental** - Requires env var
-3. **No GUI** - Terminal-only (v2.0 will add web dashboard)
-4. **Single Sprint** - Multi-sprint support in v1.2
-5. **Manual Testing** - No automated tests yet
-6. **English Only** - i18n planned for future
+| Session | Configuration | Result |
+|---------|--------------|--------|
+| 13 | Parallel + worktree (standalone Task) | FAILED — Edit/Write denied |
+| 14 | Worktree + bypassPermissions (no TeamCreate) | FAILED |
+| 16 | TeamCreate + team_name + worktree + bypassPermissions | SUCCESS — 24 stories, 3 parallel agents |
 
-### Not Issues (By Design)
+### Needs Testing
 
-- Document-driven (agents don't share memory) ✅ This is intentional
-- Sequential phases with gates ✅ Enforces quality
-- Opus for complex agents ✅ Cost vs quality tradeoff
-
----
-
-## 📦 Publishing Checklist
-
-### Before Publishing to npm
-
-- [x] All agents tested
-- [x] All commands tested
-- [x] Documentation complete
-- [x] CHANGELOG.md updated
-- [x] package.json version set
-- [x] LICENSE file present
-- [ ] GitHub repository created
-- [ ] npm account created
-- [ ] Test installation on clean system
-- [ ] Record demo video (optional)
-- [ ] Announce on social media (optional)
-
-### Publishing Steps
-
-```bash
-# 1. Create GitHub repo
-git init
-git add .
-git commit -m "Initial release v1.0.0"
-git remote add origin https://github.com/bmad-code-org/bmad-agent-teams.git
-git push -u origin main
-
-# 2. Tag release
-git tag -a v1.0.0 -m "Release version 1.0.0"
-git push --tags
-
-# 3. Publish to npm
-npm login
-npm publish --access public
-
-# 4. Test installation
-npx @bmad-code/agent-teams install /tmp/test-project
-```
+- [ ] `Promise.all` pattern across all phases via `/bmad-next`
+- [ ] Worktree without `bypassPermissions` (with proper hooks)
+- [ ] Multi-epic parallel story writing (Phase 4b)
+- [ ] Context compaction recovery across phases
+- [ ] Full end-to-end run through all 8 phases
 
 ---
 
-## 🔄 Recent Changes
+## Next Steps
 
-### February 19, 2024 - Project Restructuring
+### Immediate
 
-**Changed**:
-- Removed project-specific directories (`src/`, `tests/`, `docs/stories/`)
-- Moved documentation to root level
-- Created npm package structure
-- Added CLI with npx support
-- Enhanced installer with flags
-- Created comprehensive development docs
+1. [ ] Validate `Promise.all` fixes via `/bmad-next` end-to-end test
+2. [ ] Confirm worktree spawn pattern and encode into orchestrator if validated
+3. [ ] Test compaction recovery with real session tracker
 
-**Added**:
-- `cli.js` - CLI entry point
-- `index.js` - Module API
-- `package.json` - npm config
-- `CHANGELOG.md` - Version tracking
-- `DEVELOPMENT.md` - Dev guide
-- `ROADMAP.md` - Future plans
-- `PROJECT-STATUS.md` - This file
-- `.gitignore` / `.npmignore`
-- `LICENSE` (MIT)
+### Short-Term (Enhancement Roadmap P1)
 
-**Fixed**:
-- Plugin now installable across projects
-- Clear separation of plugin vs project files
-- Proper npm package structure
+See `docs/ENHANCEMENT-ROADMAP.md` for full details:
+
+1. [ ] Story dependency ordering in sprint execution
+2. [ ] Incremental architecture updates during implementation
+3. [ ] Cross-agent conflict detection
+4. [ ] Sprint retrospective automation
+
+### Long-Term
+
+1. [ ] Multi-sprint support
+2. [ ] Web dashboard for project tracking
+3. [ ] Automated test suite for the plugin itself
+4. [ ] i18n support
 
 ---
 
-## 📊 Metrics
+## Architecture Decisions
 
-### Code Statistics
+Key design choices documented across the project:
 
-- **Total Lines**: ~5,500
-- **Agent Definitions**: ~2,000 lines
-- **Commands**: ~800 lines
-- **Documentation**: ~2,500 lines
-- **Scripts**: ~200 lines
-
-### File Counts
-
-- Agent files: 12
-- Command files: 8
-- Template files: 4
-- Documentation files: 9
-- Script files: 2
-- Config files: 3
-
-### Documentation Coverage
-
-- User documentation: 100%
-- Developer documentation: 100%
-- Code comments: ~60% (agents/commands have instructions)
-- Examples: Multiple (WORKED-EXAMPLE.md + inline)
+- **Orchestrator as main chat** (not subagent) — Enables user interaction, session persistence, and direct parallel agent coordination
+- **`Promise.all` over `run_in_background`** — Background agents lose interactive permissions; foreground parallel preserves them
+- **Document-driven relay** — Agents pass context via files, not shared memory, enabling context isolation and token savings
+- **Three-level tracking** — Session tracker (orchestrator), project tracker (team), story files (individual tasks)
+- **Token optimization via lazy loading** — Agents only read documents they need, not the entire project context
 
 ---
 
-## 🎯 Next Steps
-
-### Immediate (This Week)
-
-1. [ ] Delete `README-OLD.md` backup
-2. [ ] Create GitHub repository
-3. [ ] Test full installation on clean machine
-4. [ ] Record quick demo video
-5. [ ] Publish to npm
-
-### Short-term (Next Month)
-
-1. [ ] Add automated tests
-2. [ ] Create example project repository
-3. [ ] Write blog post announcement
-4. [ ] Get community feedback
-5. [ ] Start v1.1 planning
-
-### Long-term (Q2-Q4 2024)
-
-See [ROADMAP.md](ROADMAP.md) for detailed future plans.
-
----
-
-## 🤝 How to Contribute
-
-See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines.
-
-Quick links:
-- Report bugs: [GitHub Issues](https://github.com/bmad-code-org/bmad-agent-teams/issues)
-- Request features: [GitHub Discussions](https://github.com/bmad-code-org/bmad-agent-teams/discussions)
-- Submit PRs: Fork, branch, PR
-
----
-
-## 📞 Support
-
-- **Documentation**: [README.md](README.md)
-- **Usage Guide**: [USAGE-GUIDE.md](USAGE-GUIDE.md)
-- **Developer Guide**: [DEVELOPMENT.md](DEVELOPMENT.md)
-- **Issues**: [GitHub Issues](https://github.com/bmad-code-org/bmad-agent-teams/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/bmad-code-org/bmad-agent-teams/discussions)
-
----
-
-**Status**: ✅ Ready for release!
-
-This plugin is complete and ready for npm publishing. All core features work, documentation is comprehensive, and the installation process is smooth.
+**Status**: Active Development — Core workflow functional, parallel execution fixed, testing ongoing.

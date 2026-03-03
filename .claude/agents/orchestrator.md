@@ -84,27 +84,29 @@ Edit({
 });
 ```
 
-#### 2. Agent Spawn (Especially Background Tasks)
+#### 2. Agent Spawn
 ```typescript
-// Spawn agent in background
-const taskResult = await Task({
-  subagent_type: "Story Writer",
-  description: "Create stories for EPIC-001",
-  prompt: "...",
-  run_in_background: true
+// Spawn agents — use Promise.all for parallel phases, sequential await for single agents
+// IMPORTANT: Do NOT use run_in_background — it prevents interactive permissions (Edit, Bash, Write)
+
+// Single agent (Phase 1, 3, 4, 6, 7, 8):
+const result = await Task({
+  subagent_type: "Business Analyst",
+  description: "Create Product Brief",
+  prompt: "..."
 });
 
-// IMMEDIATELY update tracker with Task ID
+// Parallel agents (Phase 2, 4b, 5) — spawn ALL in a single Promise.all:
+await Promise.all([
+  Task({ subagent_type: "Product Manager", ... }),
+  Task({ subagent_type: "UX Designer", ... })
+]);
+
+// IMMEDIATELY update tracker after spawn/completion
 await Edit({
   file_path: "docs/session-tracker.md",
-  old_string: "Story Writer (EPIC-001): [✅ Complete | ⏳ Running | 🔴 Background Task ID: task_xxx]",
-  new_string: `Story Writer (EPIC-001): [🔴 Background Task ID: ${taskResult.task_id}]`
-});
-
-// Add to Active Background Tasks table
-await Edit({
-  old_string: "| task_abc123 | Story Writer | EPIC-001 | [timestamp] | [Running ⏳ | Complete ✅] | /path/to/output |",
-  new_string: `| ${taskResult.task_id} | Story Writer | EPIC-001 | ${new Date().toISOString()} | Running ⏳ | ${taskResult.output_file} |`
+  old_string: "Product Manager: [✅ Complete | ⏳ Running]",
+  new_string: "Product Manager: [✅ Complete]"
 });
 ```
 
@@ -300,47 +302,38 @@ await Edit({
 
 #### Example 1: Compacted During Phase 4b (Parallel Story Writers)
 
-**Scenario**: 4 story writers spawned in background, session compacted while running
+**Scenario**: 4 story writers were spawned via Promise.all, session compacted while running
 
 **Recovery**:
 ```typescript
 // 1. Read tracker
 const tracker = await Read({ file_path: "docs/session-tracker.md" });
 
-// 2. Parse active tasks
-// From tracker: "Active Background Tasks" table shows:
-//   - task_abc123 | Story Writer | EPIC-001 | Running
-//   - task_def456 | Story Writer | EPIC-002 | Running
-//   - task_ghi789 | Story Writer | EPIC-003 | Running
-//   - task_jkl012 | Story Writer | EPIC-004 | Running
+// 2. Check which story files were created (story writers write to docs/stories/)
+const stories = await Glob({ pattern: "docs/stories/STORY-*.md" });
+const epics = await Glob({ pattern: "docs/epics/EPIC-*.md" });
 
-// 3. Check each task
-const tasks = ["task_abc123", "task_def456", "task_ghi789", "task_jkl012"];
-const results = await Promise.all(
-  tasks.map(id => TaskOutput({ task_id: id, block: false, timeout: 1000 }))
-);
+// 3. Determine if all epics have their stories
+// Each epic has a story range — check if stories exist for each epic
 
-// 4. Analyze results
-results.forEach((result, index) => {
-  if (result.completed) {
-    console.log(`Story Writer ${index + 1} complete`);
-    // Update tracker to mark complete
-  } else {
-    console.log(`Story Writer ${index + 1} still running`);
-    // Can read partial output from result.output_file
-  }
-});
-
-// 5. Once all complete, proceed to Phase 5
-if (results.every(r => r.completed)) {
+// 4. If all stories created, Phase 4b is complete → proceed to Phase 5
+if (allEpicsHaveStories) {
   // Update tracker: Phase 4b complete
   // Proceed to Phase 5 implementation
 }
+
+// 5. If some epics missing stories, re-spawn story writers for incomplete epics only
+// Use Promise.all to spawn all remaining writers in parallel
+await Promise.all(
+  incompleteEpics.map(epic =>
+    Task({ subagent_type: "Story Writer", description: `Create stories for ${epic.id}`, ... })
+  )
+);
 ```
 
-#### Example 2: Compacted During Phase 5 (Parallel Frontend + Mobile)
+#### Example 2: Compacted During Phase 5 (Parallel Developers)
 
-**Scenario**: Frontend and Mobile developers running in parallel, session compacted
+**Scenario**: Developer agents were running via Promise.all, session compacted
 
 **Recovery**:
 ```typescript
@@ -348,41 +341,34 @@ if (results.every(r => r.completed)) {
 const tracker = await Read({ file_path: "docs/session-tracker.md" });
 
 // 2. Current phase: "Phase 5: Implementation"
-// 3. Active tasks:
-//   - task_front123 | Frontend Developer | Phase 5 | Running
-//   - task_mobile456 | Mobile Developer | Phase 5 | Running
+// 3. Check what code and stories were completed
 
-// 4. Check statuses
-const frontendStatus = await TaskOutput({
-  task_id: "task_front123",
-  block: false
+// 4. Check story completion status
+const storyStatuses = await Bash({
+  command: `for story in docs/stories/STORY-*.md; do
+    if grep -q "Status: Done" "$story"; then
+      echo "$(basename $story): Done"
+    else
+      echo "$(basename $story): Incomplete"
+    fi
+  done`,
+  description: "Check story completion statuses"
 });
 
-const mobileStatus = await TaskOutput({
-  task_id: "task_mobile456",
-  block: false
+// 5. Check git commits
+const commits = await Bash({
+  command: "git log --oneline -20 | grep '\\[STORY-'",
+  description: "Check recent story commits"
 });
 
-// 5. Read partial outputs if still running
-if (!frontendStatus.completed) {
-  // Read background output file to see progress
-  const frontendOutput = await Read({
-    file_path: frontendStatus.output_file
-  });
-  console.log("Frontend progress:", frontendOutput);
-}
-
-// 6. Once both complete, verify all stories pushed
-if (frontendStatus.completed && mobileStatus.completed) {
-  // Check git status
-  await Bash({
-    command: "git log --oneline -10",
-    description: "Verify recent commits"
-  });
-
-  // Update tracker: Phase 5 complete
-  // Proceed to Phase 6 (QA)
-}
+// 6. If all stories done, proceed to Phase 6 (QA)
+// 7. If some incomplete, re-spawn developers for remaining stories
+//    Use Promise.all to spawn all needed developers in parallel
+await Promise.all([
+  // Only spawn developers whose track stories are incomplete
+  Task({ team_name: "sprint-1", name: "frontend-dev", subagent_type: "Frontend Developer", ... }),
+  Task({ team_name: "sprint-1", name: "mobile-dev", subagent_type: "Mobile Developer", ... })
+]);
 ```
 
 ---
@@ -396,34 +382,28 @@ if (frontendStatus.completed && mobileStatus.completed) {
 await Edit({
   file_path: "docs/session-tracker.md",
   old_string: "**Next Action**: [What needs to happen next]",
-  new_string: "**Next Action**: Spawn Backend Developer for Phase 5"
+  new_string: "**Next Action**: Spawn developers for Phase 5 via Agent Team"
 });
 
-// 2. During action: Record agent spawn
-const task = await Task({
-  subagent_type: "Backend Developer",
-  run_in_background: true,
-  ...
-});
+// 2. Spawn agents (use Promise.all for parallel, NOT run_in_background)
+// Phase 5 example — all developers in one Promise.all:
+await Promise.all([
+  Task({ team_name: "sprint-1", name: "db-engineer", subagent_type: "Database Engineer", ... }),
+  Task({ team_name: "sprint-1", name: "backend-dev", subagent_type: "Backend Developer", ... }),
+  Task({ team_name: "sprint-1", name: "frontend-dev", subagent_type: "Frontend Developer", ... })
+]);
 
-// 3. Immediately after spawn: Record in tracker
+// 3. After all complete: Update tracker
 await Edit({
   file_path: "docs/session-tracker.md",
-  old_string: "Backend Developer: [✅ Complete | ⏳ Running | 🔴 Background Task ID: task_xxx]",
-  new_string: `Backend Developer: [🔴 Background Task ID: ${task.task_id}]`
+  old_string: "Database Engineer: [⏳ Running]",
+  new_string: "Database Engineer: [✅ Complete]"
 });
 
-// 4. After completion: Update status
+// 4. Update next action
 await Edit({
-  file_path: "docs/session-tracker.md",
-  old_string: `Backend Developer: [🔴 Background Task ID: ${task.task_id}]`,
-  new_string: "Backend Developer: [✅ Complete]"
-});
-
-// 5. After completion: Update next action
-await Edit({
-  old_string: "**Next Action**: Spawn Backend Developer for Phase 5",
-  new_string: "**Next Action**: Backend complete. Spawn Frontend + Mobile in parallel"
+  old_string: "**Next Action**: Spawn developers for Phase 5 via Agent Team",
+  new_string: "**Next Action**: All developers complete. Proceed to Phase 6 (QA)."
 });
 ```
 
@@ -699,7 +679,8 @@ const arch = await Read({ file_path: "docs/architecture.md" });
 const summary = await Read({ file_path: "docs/PROJECT-SUMMARY.md" });
 const epics = await Glob({ pattern: "docs/epics/EPIC-*.md" });
 
-// Step 2: For each epic, extract relevant context
+// Step 2: For each epic, extract relevant context and build spawn calls
+const storyWriterSpawns = [];
 for (const epic of epics) {
   const epicData = await Read({ file_path: epic });
 
@@ -712,49 +693,54 @@ for (const epic of epics) {
   // Extract ONLY naming conventions for this track
   const trackNaming = extractNamingForTrack(epicData.track, summary);
 
-  // Step 3: Spawn story writer with MINIMAL context
-  await Task({
-    subagent_type: "Story Writer",
-    description: `Create stories for ${epic.id}`,
-    prompt: `You are a Story Writer (Haiku model - fast & cost-effective).
+  // Step 3: Build spawn call for this epic (will be run in parallel below)
+  storyWriterSpawns.push(
+    Task({
+      subagent_type: "Story Writer",
+      description: `Create stories for ${epic.id}`,
+      prompt: `You are a Story Writer (Haiku model - fast & cost-effective).
 
-             EPIC: ${epic.id} - ${epic.title}
-             TRACK: ${epic.track}
+               EPIC: ${epic.id} - ${epic.title}
+               TRACK: ${epic.track}
 
-             CONTEXT (extracted by orchestrator - DO NOT read full PRD/Architecture):
+               CONTEXT (extracted by orchestrator - DO NOT read full PRD/Architecture):
 
-             Tech Stack:
-             ${summary.techStack}
+               Tech Stack:
+               ${summary.techStack}
 
-             Epic Features (from PRD):
-             ${epicFeatures}  // 2-3k tokens, not 20k full PRD
+               Epic Features (from PRD):
+               ${epicFeatures}  // 2-3k tokens, not 20k full PRD
 
-             Architecture Constraints (${epic.track} track only):
-             ${trackArch}  // 3-5k tokens, not 25k full architecture
+               Architecture Constraints (${epic.track} track only):
+               ${trackArch}  // 3-5k tokens, not 25k full architecture
 
-             Naming Conventions (${epic.track} track):
-             ${trackNaming}  // 2-3k tokens
+               Naming Conventions (${epic.track} track):
+               ${trackNaming}  // 2-3k tokens
 
-             FILES TO READ:
-             - docs/epics/${epic.id}.md (your primary input)
-             - docs/naming-registry.md (for cross-reference only)
+               FILES TO READ:
+               - docs/epics/${epic.id}.md (your primary input)
+               - docs/naming-registry.md (for cross-reference only)
 
-             DO NOT READ (orchestrator extracted relevant parts above):
-             ❌ docs/prd.md
-             ❌ docs/architecture.md
+               DO NOT READ (orchestrator extracted relevant parts above):
+               ❌ docs/prd.md
+               ❌ docs/architecture.md
 
-             CREATE: docs/stories/STORY-${epic.storyRangeStart} through STORY-${epic.storyRangeEnd}
+               CREATE: docs/stories/STORY-${epic.storyRangeStart} through STORY-${epic.storyRangeEnd}
 
-             Use template: templates/story.md
+               Use template: templates/story.md
 
-             OUTPUT PROTOCOL (Token Optimization):
-             After creating all stories, return ONLY:
-             "✅ Stories created for ${epic.id}. Files: STORY-${epic.storyRangeStart} to STORY-${epic.storyRangeEnd}. Count: [N] stories, [M] total points."
+               OUTPUT PROTOCOL (Token Optimization):
+               After creating all stories, return ONLY:
+               "✅ Stories created for ${epic.id}. Files: STORY-${epic.storyRangeStart} to STORY-${epic.storyRangeEnd}. Count: [N] stories, [M] total points."
 
-             DO NOT return full story content in your response.`,
-    run_in_background: true
-  });
+               DO NOT return full story content in your response.`
+    })
+  );
 }
+
+// Step 4: Spawn ALL story writers in PARALLEL using Promise.all
+// IMPORTANT: Do NOT use run_in_background — it prevents interactive permissions (Edit, Bash, Write)
+await Promise.all(storyWriterSpawns);
 
 // Token Savings:
 // Before: 4 writers × 60k (full docs) = 240k tokens
@@ -925,6 +911,10 @@ await Task({
 ```
 
 **Complete Phase 5 Spawn Pattern (Agent Team):**
+
+**IMPORTANT**: Spawn all developers in a single `Promise.all` call for true parallel execution.
+Do NOT use `run_in_background` — it prevents interactive permissions (Edit, Bash, Write tools fail silently).
+
 ```typescript
 // Step 0: Setup git sprint branch
 await Bash({
@@ -938,13 +928,15 @@ await TeamCreate({
   description: "Sprint 1 — Coordinated parallel implementation with git tracking"
 });
 
-// Step 2: Spawn teammates (they coordinate via messaging and shared task list)
-await Task({
-  team_name: "sprint-1",
-  name: "db-engineer",
-  subagent_type: "Database Engineer",
-  description: "Implement database stories",
-  prompt: `You are working on Sprint 1 as part of an Agent Team.
+// Step 2: Spawn ALL teammates in PARALLEL using Promise.all
+// This enables: true concurrency, interactive permissions, SendMessage coordination
+await Promise.all([
+  Task({
+    team_name: "sprint-1",
+    name: "db-engineer",
+    subagent_type: "Database Engineer",
+    description: "Implement database stories",
+    prompt: `You are working on Sprint 1 as part of an Agent Team.
 
 PRIORITY: You are the foundation! Backend and Frontend depend on your schema.
 
@@ -954,16 +946,15 @@ COORDINATION:
 - Notify team lead when all stories complete
 
 STORIES: Claim Database-track stories from docs/stories/
-Your agent file contains full git workflow and implementation instructions.`,
-  run_in_background: true
-});
+Your agent file contains full git workflow and implementation instructions.`
+  }),
 
-await Task({
-  team_name: "sprint-1",
-  name: "backend-dev",
-  subagent_type: "Backend Developer",
-  description: "Implement backend stories",
-  prompt: `You are working on Sprint 1 as part of an Agent Team.
+  Task({
+    team_name: "sprint-1",
+    name: "backend-dev",
+    subagent_type: "Backend Developer",
+    description: "Implement backend stories",
+    prompt: `You are working on Sprint 1 as part of an Agent Team.
 
 COORDINATION:
 - Wait for db-engineer messages about completed schema stories before starting dependent API stories
@@ -972,16 +963,15 @@ COORDINATION:
 - Notify team lead when all stories complete
 
 STORIES: Claim Backend-track stories from docs/stories/
-Your agent file contains full git workflow and implementation instructions.`,
-  run_in_background: true
-});
+Your agent file contains full git workflow and implementation instructions.`
+  }),
 
-await Task({
-  team_name: "sprint-1",
-  name: "frontend-dev",
-  subagent_type: "Frontend Developer",
-  description: "Implement frontend stories",
-  prompt: `You are working on Sprint 1 as part of an Agent Team.
+  Task({
+    team_name: "sprint-1",
+    name: "frontend-dev",
+    subagent_type: "Frontend Developer",
+    description: "Implement frontend stories",
+    prompt: `You are working on Sprint 1 as part of an Agent Team.
 
 COORDINATION:
 - Wait for backend-dev messages about completed API endpoints before starting dependent UI stories
@@ -990,21 +980,20 @@ COORDINATION:
 - Notify team lead when all stories complete
 
 STORIES: Claim Frontend-track stories from docs/stories/
-Your agent file contains full git workflow and implementation instructions.`,
-  run_in_background: true
-});
+Your agent file contains full git workflow and implementation instructions.`
+  })
 
-// Mobile developer (optional, only if mobile stories exist)
-// await Task({
-//   team_name: "sprint-1",
-//   name: "mobile-dev",
-//   subagent_type: "Mobile Developer",
-//   description: "Implement mobile stories",
-//   prompt: `You are working on Sprint 1 as part of an Agent Team.
-//   COORDINATION: Wait for backend-dev API completion. SendMessage for updates.
-//   STORIES: Claim Mobile-track stories from docs/stories/`,
-//   run_in_background: true
-// });
+  // Mobile developer (optional, only if mobile stories exist):
+  // Task({
+  //   team_name: "sprint-1",
+  //   name: "mobile-dev",
+  //   subagent_type: "Mobile Developer",
+  //   description: "Implement mobile stories",
+  //   prompt: `You are working on Sprint 1 as part of an Agent Team.
+  //   COORDINATION: Wait for backend-dev API completion. SendMessage for updates.
+  //   STORIES: Claim Mobile-track stories from docs/stories/`
+  // })
+]);
 - Backend API: src/api/ (created by Backend Developer)
 
 **OUTPUT:**
@@ -1302,15 +1291,19 @@ Maintain `docs/project-tracker.md` — update after every phase transition and p
 
 ## Spawning Strategy
 
-| Phase | Mode | Why |
+**CRITICAL: NEVER use `run_in_background: true` for agent spawns.**
+Background agents cannot request interactive permissions (Edit, Bash, Write tools fail silently).
+For parallel execution, use a single `Promise.all([Task(...), Task(...)])` call instead.
+
+| Phase | Mode | How to Spawn |
 |-------|------|-----|
-| 1 (Discovery) | Single subagent | One analyst, sequential |
-| 2 (Planning) | Parallel subagents | PM + UX are independent |
-| 3 (Architecture) | Single subagent | Architect needs full context |
-| 4 (Epics) | Single subagent | Scrum Master creates epics holistically |
-| 4b (Stories) | **Parallel subagents (1 per epic)** | Each epic's stories are independent |
-| 5 (Implementation) | **Agent Team** | 3 devs coordinate via shared tasks |
-| 6-8 | Single subagents | Sequential review/deploy/sign-off |
+| 1 (Discovery) | Single subagent | `await Task({ subagent_type: "Business Analyst", ... })` |
+| 2 (Planning) | Parallel subagents | `await Promise.all([Task({PM}), Task({UX})])` |
+| 3 (Architecture) | Single subagent | `await Task({ subagent_type: "System Architect", ... })` |
+| 4 (Epics) | Single subagent | `await Task({ subagent_type: "Scrum Master", ... })` |
+| 4b (Stories) | **Parallel subagents** | `await Promise.all(epics.map(e => Task({StoryWriter})))` |
+| 5 (Implementation) | **Agent Team** | `TeamCreate + await Promise.all([Task({DB}), Task({BE}), Task({FE})])` |
+| 6-8 | Single subagents | `await Task(...)` sequentially |
 
 ## Streaming Outputs Protocol (Phase 3 Optimization)
 
