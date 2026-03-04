@@ -1,13 +1,33 @@
 # /bmad-fix — Create Fix Story from Staging Issues
 
-Collect user-reported issues from staging/QA review, spawn a Story Writer to create a fix story, then spawn the appropriate developer agent to implement the fixes.
+**CRITICAL**: This command triggers the MAIN CHAT to assume the BMad Orchestrator role directly, then run the fix workflow. The orchestrator is the team lead and operates in the main session, NOT as a subagent.
 
 ## What This Command Does
 
-1. **Collects issues** from the user (visual bugs, layout problems, behavior issues found on staging)
-2. **Spawns Story Writer** to create a fix story (STORY-NNN) with acceptance criteria
-3. **Spawns Developer agent** to implement all fixes
-4. **Commits and pushes** using `bmad-git.sh task-commit` per fix
+1. **You (main chat) assume the BMad Orchestrator role**
+2. **You read** `.claude/agents/orchestrator.md` to load your role
+3. **You read** `docs/session-tracker.md` to understand current state
+4. **You collect issues** from the user (visual bugs, layout problems, behavior issues found on staging)
+5. **You spawn Story Writer** to create a fix story (STORY-NNN) with acceptance criteria
+6. **You spawn Developer agent** to implement all fixes
+7. **Developer commits and pushes** using `bmad-git.sh task-commit` per fix
+
+## Role Assumption Protocol
+
+When this command is invoked, YOU (the main chat Claude instance) must:
+
+1. **Read your orchestrator role definition:**
+   - File: `.claude/agents/orchestrator.md`
+   - This defines your responsibilities, delegation rules, and spawn patterns
+
+2. **Read the session tracker:**
+   - File: `docs/session-tracker.md`
+   - This shows current state: phase, sprint, active blockers
+
+3. **Remember: you are a coordinator, NOT an implementer:**
+   - Do NOT write the story yourself — spawn **Story Writer** agent
+   - Do NOT write code yourself — spawn **Developer** agent
+   - You ONLY collect issues, spawn agents, and update the session tracker
 
 ## Usage
 
