@@ -27,14 +27,27 @@ RECENT_AGENTS=""
 RECENT_FILES=""
 
 if [ -n "$TRANSCRIPT" ] && [ -f "$TRANSCRIPT" ]; then
+  # Tool uses are nested inside assistant messages at .message.content[].type == "tool_use"
+  # NOT at the top level — the JSONL has types: assistant, user, progress, system, etc.
+
   # Extract recent tool uses (what was being worked on)
-  RECENT_TOOLS=$(tail -200 "$TRANSCRIPT" | jq -r 'select(.type == "tool_use") | .name // empty' 2>/dev/null | sort | uniq -c | sort -rn | head -10)
+  RECENT_TOOLS=$(tail -500 "$TRANSCRIPT" | jq -r '
+    select(.type == "assistant") | .message.content[]? |
+    select(.type == "tool_use") | .name // empty
+  ' 2>/dev/null | sort | uniq -c | sort -rn | head -10)
 
   # Extract recent agent spawns
-  RECENT_AGENTS=$(tail -200 "$TRANSCRIPT" | jq -r 'select(.type == "tool_use" and .name == "Task") | .input.description // empty' 2>/dev/null | tail -5)
+  RECENT_AGENTS=$(tail -500 "$TRANSCRIPT" | jq -r '
+    select(.type == "assistant") | .message.content[]? |
+    select(.type == "tool_use" and .name == "Agent") | .input.description // empty
+  ' 2>/dev/null | tail -5)
 
   # Extract recently edited files
-  RECENT_FILES=$(tail -200 "$TRANSCRIPT" | jq -r 'select(.type == "tool_use" and (.name == "Write" or .name == "Edit")) | .input.file_path // empty' 2>/dev/null | sort -u | tail -10)
+  RECENT_FILES=$(tail -500 "$TRANSCRIPT" | jq -r '
+    select(.type == "assistant") | .message.content[]? |
+    select(.type == "tool_use" and (.name == "Write" or .name == "Edit")) |
+    .input.file_path // empty
+  ' 2>/dev/null | sort -u | tail -10)
 fi
 
 # Build checkpoint content
