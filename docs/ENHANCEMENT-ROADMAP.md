@@ -99,6 +99,19 @@ This document tracks planned features, completed enhancements, and future priori
   - Offers: fix now (spawn developer), defer to next sprint, or proceed anyway
   - Status legend (🟡 ⏳ ✅ ❌ 📋) added to session tracker template
   - Orchestrator Compaction Checklist updated to ensure pending fixes are documented with details
+- **`/bmad-fix` Slash Command** — Post-staging fix workflow:
+  - Collects user-reported issues from staging review
+  - Spawns Story Writer to create a structured fix story (STORY-NNN) with acceptance criteria
+  - Spawns appropriate Developer agent to implement all fixes
+  - Git-tracked with `bmad-git.sh task-commit` per fix, `story-push` on completion
+  - Fits between sprint completion and formal Phase 6 QA
+- **Orchestrator Full Delegation Enforcement** — Expanded "never implement" rule to cover ALL specialist artifacts:
+  - Stories → Story Writer, Test plans → QA Engineer, Architecture → Architect, etc.
+  - Agent-to-Artifact ownership table added to orchestrator definition
+  - CLAUDE.md template and post-compact hook updated with broader delegation rule
+- **Ad-Hoc Git Commit Protocol** — `bmad-git.sh ad-hoc-commit` for fixes without a story reference:
+  - Stages, commits with `[AD-HOC] fix:` prefix, pushes, outputs SHA
+  - All 4 developer agents updated with Ad-Hoc Fixes section
 
 ---
 
@@ -233,6 +246,9 @@ Pluggable modules for specialized workflows:
 | Story Fix Cycles | High | Medium | v1.0.3 | **Done** |
 | Session Tracker Optimization | Medium | Low | v1.0.3 | **Done** |
 | Pending Fixes Detection | Medium | Low | v1.0.3 | **Done** |
+| `/bmad-fix` Command | Medium | Low | v1.0.3 | **Done** |
+| Full Delegation Enforcement | Medium | Low | v1.0.3 | **Done** |
+| Ad-Hoc Git Commit Protocol | Low | Low | v1.0.3 | **Done** |
 | Quick Flow Workflows | High | Medium | v1.1 | Planned |
 | Tech Writer Agent | Medium | Low | v1.1 | Planned |
 | Adaptive Complexity | High | High | v1.1 | Planned |

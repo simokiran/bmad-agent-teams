@@ -134,7 +134,7 @@ echo -e "  ${GREEN}✅ 15 agent definitions${NC}"
 # Copy commands
 if [[ -d "${SCRIPT_DIR}/.claude/commands" ]]; then
   cp -r "${SCRIPT_DIR}/.claude/commands/"* "${TARGET}/.claude/commands/"
-  echo -e "  ${GREEN}✅ 9 slash commands${NC}"
+  echo -e "  ${GREEN}✅ 10 slash commands${NC}"
 fi
 
 # Copy skills
@@ -233,12 +233,15 @@ You are the **BMad Orchestrator** for this project. You coordinate 15 specialize
 
 ## CRITICAL: You Are a Coordinator, NOT an Implementer
 
-**You NEVER write application code, edit source files, fix bugs, or implement features yourself.**
+**You NEVER produce specialist artifacts yourself — not code, not stories, not test plans, not architecture docs.**
 
-Your job is to **delegate** all implementation work to specialist agents:
-- When the user asks to fix/change code → spawn the appropriate developer agent (Frontend Dev, Backend Dev, Database Engineer, Mobile Dev)
-- You may read code to understand state and plan delegation, but NEVER use Edit/Write on `src/`, `tests/`, or application code files
-- After an agent completes, you update the session tracker and inform the user
+Your job is to **delegate ALL specialist work** to the appropriate agent:
+- Code changes → spawn developer agent (Frontend Dev, Backend Dev, Database Engineer, Mobile Dev)
+- Story creation → spawn **Story Writer** agent
+- Test plans → spawn **QA Engineer** agent
+- Architecture → spawn **System Architect** agent
+- You may read files to understand state, but NEVER use Edit/Write on specialist artifacts
+- You ONLY write/edit: `docs/session-tracker.md`, `docs/project-tracker.md`, `docs/sprint-plan.md`
 
 ## Auto-Recovery Protocol
 
@@ -263,6 +266,7 @@ If your context has been compacted, the SessionStart hook will inject recovery c
 - `/bmad-status` — Show current phase and progress
 - `/bmad-next` — Resume or advance to next phase
 - `/bmad-track` — Show epic/story dashboard
+- `/bmad-fix` — Create fix story from staging issues + implement
 - `/bmad-gate` — Run quality gate check
 CLAUDEMD
     echo -e "  ${GREEN}✅ CLAUDE.md created (was missing)${NC}"
@@ -288,12 +292,15 @@ You are the **BMad Orchestrator** for this project. You coordinate 15 specialize
 
 ## CRITICAL: You Are a Coordinator, NOT an Implementer
 
-**You NEVER write application code, edit source files, fix bugs, or implement features yourself.**
+**You NEVER produce specialist artifacts yourself — not code, not stories, not test plans, not architecture docs.**
 
-Your job is to **delegate** all implementation work to specialist agents:
-- When the user asks to fix/change code → spawn the appropriate developer agent (Frontend Dev, Backend Dev, Database Engineer, Mobile Dev)
-- You may read code to understand state and plan delegation, but NEVER use Edit/Write on `src/`, `tests/`, or application code files
-- After an agent completes, you update the session tracker and inform the user
+Your job is to **delegate ALL specialist work** to the appropriate agent:
+- Code changes → spawn developer agent (Frontend Dev, Backend Dev, Database Engineer, Mobile Dev)
+- Story creation → spawn **Story Writer** agent
+- Test plans → spawn **QA Engineer** agent
+- Architecture → spawn **System Architect** agent
+- You may read files to understand state, but NEVER use Edit/Write on specialist artifacts
+- You ONLY write/edit: `docs/session-tracker.md`, `docs/project-tracker.md`, `docs/sprint-plan.md`
 
 ## Auto-Recovery Protocol
 
@@ -318,6 +325,7 @@ If your context has been compacted, the SessionStart hook will inject recovery c
 - `/bmad-status` — Show current phase and progress
 - `/bmad-next` — Resume or advance to next phase
 - `/bmad-track` — Show epic/story dashboard
+- `/bmad-fix` — Create fix story from staging issues + implement
 - `/bmad-gate` — Run quality gate check
 CLAUDEMD
   echo -e "  ${GREEN}✅ CLAUDE.md (orchestrator role + recovery)${NC}"
@@ -360,7 +368,7 @@ echo "════════════════════════�
 echo ""
 echo "  BMad Framework in .claude/ directory:"
 echo "    .claude/agents/       — 15 agent definitions"
-echo "    .claude/commands/     — 9 slash commands"
+echo "    .claude/commands/     — 10 slash commands"
 echo "    .claude/skills/       — BMad skills"
 echo "    .claude/templates/    — Document templates"
 echo "    .claude/scripts/      — 3 scripts (git helpers + recovery hooks)"

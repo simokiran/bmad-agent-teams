@@ -132,6 +132,7 @@ These commands are used when BMad runs in a user project (like `brandsandcorner/
 - `/bmad-next` — Advance to next phase
 - `/bmad-gate` — Run quality gate check for current phase
 - `/bmad-sprint` — Begin sprint execution (Phase 5)
+- `/bmad-fix` — Create fix story from staging issues + implement
 - `/bmad-review` — Trigger final review cycle
 - `/bmad-track` — Show project tracker (epics → stories → tasks progress)
 
