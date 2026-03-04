@@ -352,74 +352,40 @@ Read({ file_path: "/path/to/output" })
 
 ## Blockers and Issues
 
+**Status Legend:**
+- `🟡` = Active blocker — needs attention on resume
+- `⏳` = Pending fix — awaiting user input or developer action
+- `✅` = Resolved
+- `❌` = Won't fix / deferred permanently
+- `📋` = Deferred to next sprint
+
 **Current Blockers**: [None | List blockers]
 
 **Example**:
-- ❌ Phase 4b: Story Writer for EPIC-003 failed (missing context)
-  - Resolution: Re-extract context, re-spawn agent
-  - Status: [Resolved | In Progress]
+- 🟡 Phase 5: Slider not rendering on mobile (STORY-018, Frontend track)
+  - Resolution: Spawn Frontend Developer with fix context
+  - Status: Active
+- ⏳ Phase 7: User to provide reproduction steps for checkout timeout
+  - Resolution: Awaiting user input
+  - Status: Pending
+- ✅ Phase 4b: Story Writer for EPIC-003 failed (missing context)
+  - Resolution: Re-extracted context, re-spawned agent
+  - Resolved: 2026-03-03
 
 ---
 
-## Post-Compaction Recovery Protocol
+## User Notes
 
-**When session is compacted, the orchestrator MUST:**
+**Purpose**: Persistent notes requested by the user. Always preserved across compaction.
 
-1. **Immediately read this file**:
-   ```bash
-   Read({ file_path: "docs/session-tracker.md" })
-   ```
-
-2. **Check active background tasks**:
-   ```bash
-   # For each task in "Active Background Tasks" section
-   TaskOutput(task_id="task_xxx", block=false, timeout=1000)
-   ```
-
-3. **Verify phase completion**:
-   - Check all "Output Files" exist
-   - Verify current phase status
-
-4. **Resume next action**:
-   - Follow "Next Action" in "Current State"
-   - Spawn next agent or advance to next phase
-
-5. **Update this tracker**:
-   - Mark resumed session
-   - Update "Context Compaction Events" counter
-   - Update "Last Compaction" timestamp
+<!-- Add user-requested notes below. These are never archived or trimmed. -->
 
 ---
 
-## Recovery Example
+## Session Log
 
-**Scenario**: Session compacted during Phase 5 with 2 background developers running
-
-**Recovery Steps**:
-```typescript
-// 1. Read session tracker
-const sessionState = await Read({ file_path: "docs/session-tracker.md" });
-
-// 2. Parse current phase: "Phase 5: Implementation"
-// 3. Check active background tasks from tracker
-
-// 4. Check Backend Developer (task_def456)
-const backendStatus = await TaskOutput({
-  task_id: "task_def456",
-  block: false,
-  timeout: 1000
-});
-
-// 5. Check Frontend Developer (task_ghi789)
-const frontendStatus = await TaskOutput({
-  task_id: "task_ghi789",
-  block: false,
-  timeout: 1000
-});
-
-// 6. If both complete, update tracker and proceed to Phase 6
-// 7. If still running, wait or check outputs periodically
-```
+<!-- Session entries are appended below. The post-compact hook injects only the last 2 entries. -->
+<!-- When a sprint closes, the orchestrator moves old entries to docs/session-history.md. -->
 
 ---
 

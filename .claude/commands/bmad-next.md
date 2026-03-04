@@ -135,7 +135,46 @@ if (hasOngoingWork) {
   }
 }
 
-// 3. Analyze state
+// 3b. Check for pending fixes / active blockers
+// - Parse ## Blockers and Issues for 🟡 or ⏳ items
+// - Parse ## User Notes for any pending action items
+// - If active blockers found, present them BEFORE offering phase advancement
+// - Ask user: fix these first, defer, or proceed anyway?
+
+const blockersSection = sessionState.match(/## Blockers and Issues[\s\S]*?(?=\n## )/)?.[0] || "";
+const hasActiveBlockers = blockersSection.includes("🟡") || blockersSection.includes("⏳");
+
+if (hasActiveBlockers) {
+  // Extract active blocker lines
+  const activeBlockers = blockersSection.split("\n")
+    .filter(line => line.includes("🟡") || line.includes("⏳"));
+
+  console.log("⚠️  Pending fixes / active blockers detected:");
+  activeBlockers.forEach(b => console.log(`   ${b.trim()}`));
+
+  const blockerAction = await AskUserQuestion({
+    questions: [{
+      question: "There are pending fixes/blockers from a previous session. How would you like to handle them?",
+      header: "Blockers",
+      multiSelect: false,
+      options: [
+        { label: "Fix these now", description: "Spawn appropriate developer agent(s) to address the pending items" },
+        { label: "Defer to next sprint", description: "Move these to backlog and proceed with current workflow" },
+        { label: "Proceed anyway", description: "Skip blockers and continue with phase advancement" }
+      ]
+    }]
+  });
+
+  if (blockerAction.includes("Fix these now")) {
+    // Identify affected track/agent, spawn developer with fix context
+    // Update Blockers section after fixes complete (change ⏳/🟡 to ✅)
+  } else if (blockerAction.includes("Defer")) {
+    // Mark blockers as deferred (change 🟡/⏳ to 📋 Deferred)
+  }
+  // "Proceed anyway" falls through to normal phase advancement
+}
+
+// 3c. Analyze state
 // - Parse current phase from session tracker
 // - Check which artifacts exist (product-brief.md, prd.md, etc.)
 // - Identify next action
@@ -232,6 +271,23 @@ Main Chat (as Orchestrator):
   Phase 5 in progress (Agent Team detected)
   Checking active background tasks: db-engineer, backend-dev, frontend-dev
   [Checking TaskOutput for each task, resuming coordination as needed]
+```
+
+### Resume with Pending Fixes
+```
+User closed session with known post-deploy issues (Sprint 2)
+User: /bmad-next
+
+Main Chat (as Orchestrator):
+  Reading .claude/agents/orchestrator.md... ✓
+  Reading session-tracker.md... ✓
+  ⚠️  Pending fixes / active blockers detected:
+    🟡 Post-deploy: slider not rendering on mobile (STORY-018)
+    ⏳ User to provide: reproduction steps for checkout timeout
+  How would you like to handle them?
+    1. Fix these now (spawn developer)
+    2. Defer to next sprint
+    3. Proceed anyway
 ```
 
 ## Benefits

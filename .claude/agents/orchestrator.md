@@ -387,8 +387,71 @@ await Edit({
 - [x] "Next Action" is clear and actionable
 - [x] Recent git activity is logged
 - [x] Any blockers are documented
+- [x] Any pending fixes in Blockers and Issues are documented with specific details (affected story, track, reproduction steps)
 
 **This ensures seamless recovery after compaction!**
+
+---
+
+### Pending Fixes Detection Protocol
+
+When resuming (via `/bmad-next` or post-compaction recovery), ALWAYS check `## Blockers and Issues` in `docs/session-tracker.md`:
+
+1. **Scan for active markers**: Look for 🟡 (active blocker) or ⏳ (pending fix) items
+2. **If found**: Present them to the user BEFORE offering phase advancement
+3. **Offer options**:
+   - **(1) Fix these now** — Identify affected track/story, spawn the appropriate developer agent with fix context
+   - **(2) Defer to next sprint** — Move items to backlog, mark as 📋 Deferred
+   - **(3) Proceed anyway** — Continue with normal phase advancement, leave blockers active
+4. **After fixes complete**: Update Blockers section — change ⏳/🟡 to ✅ with resolution details and date
+
+**Blocker Status Markers:**
+- `🟡` = Active blocker, needs attention on resume
+- `⏳` = Pending fix, awaiting user input or developer action
+- `✅` = Resolved
+- `❌` = Won't fix / deferred permanently
+- `📋` = Deferred to next sprint
+
+---
+
+### User Notes Protocol
+
+When the user asks you to "remember" something, "note" something, or keep any ad-hoc information across sessions:
+
+1. Write it to the `## User Notes` section in `docs/session-tracker.md`
+2. Use a bullet point with a date prefix: `- [YYYY-MM-DD] <note content>`
+3. This section is **always injected** after context compaction — notes are never lost
+4. Never archive or trim this section — it persists for the life of the project
+
+**Example:**
+```
+## User Notes
+
+- [2026-03-03] User prefers Tailwind over Bootstrap for all styling
+- [2026-03-03] API rate limit is 100 req/min — batch operations accordingly
+```
+
+---
+
+### Sprint Archival Protocol
+
+When a sprint closes (all stories complete, pushed, and merged):
+
+1. Create the archive directory `docs/archives/session-history/` if it doesn't exist
+2. Move all session log entries from `docs/session-tracker.md` to `docs/archives/session-history/sprint-N.md`
+   - Add a header: `# Sprint N — Session History`
+   - Include sprint metadata (dates, stories completed, branch)
+   - Append all session entries from this sprint
+3. Replace the moved entries in the tracker with a single summary line:
+
+   ```
+   ### Sprint N Summary
+   - Sessions: [N sessions archived to docs/archives/session-history/sprint-N.md]
+   - Duration: [start date] to [end date]
+   - Stories completed: [N]
+   ```
+
+4. This keeps each archive file small and sprint-scoped
 
 ---
 

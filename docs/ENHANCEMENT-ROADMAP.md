@@ -66,8 +66,15 @@ This document tracks planned features, completed enhancements, and future priori
   - New architecture decisions: Create mid-implementation ADRs and notify developers
 - **Frontend Developer Visual Identity Integration** — Frontend dev now reads `docs/visual-identity-guide.md` for design token consistency
 
-### v1.0.3 — Story Fix Cycles (2026-03-03)
+### v1.0.3 — Story Fix Cycles & Session Optimization (2026-03-03)
 
+- **Session Tracker Token Optimization** — Post-compaction injection reduced from ~76KB to ~25KB (67% reduction):
+  - Smart selective extraction in `bmad-post-compact.sh` — only injects recovery-essential sections
+  - Skips completed phase checklists, token tracking, duplicated recovery protocols, old session logs
+  - Keeps only last 2 session entries (older sessions readable on demand)
+  - New `## User Notes` section in session tracker — always preserved across compaction, never archived
+  - Sprint Archival protocol — orchestrator moves old session logs to `docs/archives/session-history/sprint-N.md` on sprint close
+  - Removed duplicated Recovery Protocol and Recovery Example from template (already in orchestrator.md)
 - **Per-Story Code Review (Level 1)** — Optional Tech Lead lightweight review after each story completes during Phase 5:
   - Orchestrator asks user at Phase 5 start whether to enable per-story reviews
   - Tech Lead reviews only the story's files and commits (not full codebase)
@@ -87,6 +94,11 @@ This document tracks planned features, completed enhancements, and future priori
   - New statuses: In Review, Changes Requested, QA Passed
 - **Developer Fix Request Handling** — All 4 developer agents (frontend, backend, database, mobile) can now handle fix requests from Tech Lead reviews and QA bug reports
 - **QA Re-Test Cycle** — QA engineer supports targeted re-testing of specific bugs without re-running full test plan
+- **Pending Fixes Detection on Resume** — `/bmad-next` now checks `## Blockers and Issues` for 🟡/⏳ items before offering phase advancement:
+  - Presents active blockers/pending fixes to user on resume
+  - Offers: fix now (spawn developer), defer to next sprint, or proceed anyway
+  - Status legend (🟡 ⏳ ✅ ❌ 📋) added to session tracker template
+  - Orchestrator Compaction Checklist updated to ensure pending fixes are documented with details
 
 ---
 
@@ -219,6 +231,8 @@ Pluggable modules for specialized workflows:
 | Design Prototyper Agent | Medium | Medium | v1.0.2 | **Done** |
 | Mid-Impl Flexibility | High | Medium | v1.0.2 | **Done** |
 | Story Fix Cycles | High | Medium | v1.0.3 | **Done** |
+| Session Tracker Optimization | Medium | Low | v1.0.3 | **Done** |
+| Pending Fixes Detection | Medium | Low | v1.0.3 | **Done** |
 | Quick Flow Workflows | High | Medium | v1.1 | Planned |
 | Tech Writer Agent | Medium | Low | v1.1 | Planned |
 | Adaptive Complexity | High | High | v1.1 | Planned |
