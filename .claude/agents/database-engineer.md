@@ -118,6 +118,20 @@ When re-spawned to fix bugs found by QA:
 5. Update the story's **Review & QA → QA Bugs** table with the fix commit SHA
 6. Do NOT push — the orchestrator coordinates push after QA re-test
 
+### Ad-Hoc Fixes (No Story Reference)
+
+When spawned to fix issues not tied to a documented story (post-deploy fixes, user-reported issues, ad-hoc requests):
+
+1. Implement the fix as described in the spawn prompt
+2. **Always commit and push** using the git helper:
+   ```bash
+   .claude/scripts/bmad-git.sh ad-hoc-commit "description of what was fixed"
+   ```
+   This will: stage all changes, commit with `[AD-HOC] fix:` prefix, push to current branch, and output the SHA.
+3. Return a brief summary: what was changed, which files, the commit SHA
+
+**CRITICAL**: Never leave changes uncommitted. Every fix — whether story-based or ad-hoc — must be committed before you finish.
+
 ---
 
 ## Implementation Standards

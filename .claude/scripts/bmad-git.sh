@@ -226,6 +226,47 @@ update_tracker() {
 }
 
 # ============================================================================
+# ad-hoc-commit: Commit + push for fixes not tied to a story
+# ============================================================================
+ad_hoc_commit() {
+  local desc="$1"
+  local push="${2:-yes}"
+
+  # Stage all changes
+  git add -A
+
+  # Check if there's anything to commit
+  if git diff --cached --quiet; then
+    log_warn "No changes staged. Nothing to commit."
+    return 0
+  fi
+
+  # Commit with AD-HOC prefix
+  local commit_msg="[AD-HOC] fix: ${desc}"
+  git commit -m "$commit_msg"
+  log_git "Committed: $commit_msg"
+
+  # Capture SHA and timestamp
+  local sha=$(git rev-parse --short HEAD)
+  local timestamp=$(date -u +"%Y-%m-%d %H:%M UTC")
+  local branch=$(git branch --show-current)
+
+  # Push unless explicitly told not to
+  if [[ "$push" == "yes" ]]; then
+    git push origin "$branch" 2>/dev/null && log_git "Pushed to ${branch}" || log_warn "Push failed (may need upstream set)"
+  fi
+
+  log_ok "Ad-hoc fix committed"
+  echo ""
+  echo "  Description: ${desc}"
+  echo "  SHA:         ${sha}"
+  echo "  Branch:      ${branch}"
+  echo "  Time:        ${timestamp}"
+  echo "  Pushed:      ${push}"
+  echo ""
+}
+
+# ============================================================================
 # Main Dispatcher
 # ============================================================================
 case "${1:-help}" in
@@ -236,6 +277,10 @@ case "${1:-help}" in
   story-push)
     [[ -z "${2:-}" ]] && { echo "Usage: $0 story-push STORY-NNN \"story title\""; exit 1; }
     story_push "$2" "${3:-Story complete}"
+    ;;
+  ad-hoc-commit)
+    [[ -z "${2:-}" ]] && { echo "Usage: $0 ad-hoc-commit \"fix description\" [yes|no]"; exit 1; }
+    ad_hoc_commit "$2" "${3:-yes}"
     ;;
   sprint-start)
     [[ -z "${2:-}" ]] && { echo "Usage: $0 sprint-start N"; exit 1; }
@@ -258,11 +303,12 @@ case "${1:-help}" in
     echo "Usage: $0 <command> [args]"
     echo ""
     echo "Commands:"
-    echo "  task-commit STORY-NNN \"description\" [num]  Commit task, record SHA in story"
-    echo "  story-push  STORY-NNN \"title\"               Mark done, push to sprint branch"
-    echo "  sprint-start N                              Create sprint/sprint-N branch"
-    echo "  sprint-merge N                              Merge sprint to develop + tag"
-    echo "  status STORY-NNN                            Show commits for a story"
-    echo "  update-tracker                              Update project-tracker.md"
+    echo "  task-commit    STORY-NNN \"description\" [num]  Commit task, record SHA in story"
+    echo "  story-push     STORY-NNN \"title\"               Mark done, push to sprint branch"
+    echo "  ad-hoc-commit  \"description\" [yes|no]          Commit+push fix without story ref"
+    echo "  sprint-start   N                               Create sprint/sprint-N branch"
+    echo "  sprint-merge   N                               Merge sprint to develop + tag"
+    echo "  status         STORY-NNN                       Show commits for a story"
+    echo "  update-tracker                                 Update project-tracker.md"
     ;;
 esac
