@@ -266,7 +266,7 @@ If your context has been compacted, the SessionStart hook will inject recovery c
 - `/bmad-status` — Show current phase and progress
 - `/bmad-next` — Resume or advance to next phase
 - `/bmad-track` — Show epic/story dashboard
-- `/bmad-fix` — Create fix story from staging issues + implement
+- `/bmad-fix` — Create on-demand story (fixes, features, extensions)
 - `/bmad-gate` — Run quality gate check
 CLAUDEMD
     echo -e "  ${GREEN}✅ CLAUDE.md created (was missing)${NC}"
@@ -325,7 +325,7 @@ If your context has been compacted, the SessionStart hook will inject recovery c
 - `/bmad-status` — Show current phase and progress
 - `/bmad-next` — Resume or advance to next phase
 - `/bmad-track` — Show epic/story dashboard
-- `/bmad-fix` — Create fix story from staging issues + implement
+- `/bmad-fix` — Create on-demand story (fixes, features, extensions)
 - `/bmad-gate` — Run quality gate check
 CLAUDEMD
   echo -e "  ${GREEN}✅ CLAUDE.md (orchestrator role + recovery)${NC}"

@@ -1551,40 +1551,43 @@ Return ONLY a brief confirmation of what was changed.`
 // ❌ WRONG — Do NOT read the PHP yourself and start editing it!
 ```
 
-### Ad-Hoc Task
+### Ad-Hoc Tasks, New Features, and Feature Extensions
 
-User says something like "add X to the frontend" or "we also need Y":
+For ANY unplanned work — whether a small fix, a new feature, or expanding an existing story — use `/bmad-fix` or follow this protocol:
 
-1. Create a new task in the task list with clear description
-2. Assign to the appropriate developer agent (check track: Frontend, Backend, Database, Mobile)
-3. Log in `docs/session-tracker.md` Decision Log: `Ad-hoc task added: [description]`
-4. SendMessage to the developer with the new task details
+1. **Collect details** from the user (what they want, which page/component)
+2. **Spawn Story Writer** to create or update the story — do NOT write stories yourself
+3. **User approves** the story
+4. **Spawn Developer agent** to implement
+5. **Log in session tracker**: `Decision Log: [type] — STORY-NNN created/extended via /bmad-fix`
 
 ```typescript
 // Example: User says "also add a dark mode toggle"
-await TaskCreate({
-  subject: "Add dark mode toggle to header",
-  description: "User requested ad-hoc: Add dark mode toggle component to the header navbar. Should persist preference to localStorage.",
-  activeForm: "Adding dark mode toggle"
+
+// ✅ CORRECT — Spawn Story Writer to create a proper story:
+await Agent({
+  subagent_type: "Story Writer",
+  description: "Create story for dark mode toggle",
+  prompt: `Create a new feature story.
+STORY NUMBER: STORY-${nextStoryNum}
+SPRINT: Sprint ${currentSprint}
+TRACK: Frontend
+TYPE: New Feature
+
+REQUIREMENTS:
+- Add dark mode toggle to header navbar
+- Persist preference to localStorage
+
+Read docs/PROJECT-SUMMARY.md and docs/naming-registry.md for context.
+Create docs/stories/STORY-${nextStoryNum}.md with tasks and acceptance criteria.`
 });
-// Assign to frontend developer
-await TaskUpdate({ taskId: newTaskId, owner: "frontend-dev" });
-await SendMessage({
-  type: "message",
-  recipient: "frontend-dev",
-  content: "New ad-hoc task: Add dark mode toggle to header. Check the task list.",
-  summary: "Ad-hoc task: dark mode toggle"
-});
+
+// Then spawn developer to implement after user approves
+
+// ❌ WRONG — Do NOT write stories or edit story files yourself:
+// await Edit({ file_path: "docs/stories/STORY-205.md", ... }) ❌
+// await Write({ file_path: "docs/stories/STORY-026.md", ... }) ❌
 ```
-
-### Feature Extension
-
-User wants to expand an existing story with new scope:
-
-1. Read the story file
-2. Add new task rows to the story's Tasks section
-3. SendMessage to the assigned developer: "New tasks added to STORY-NNN"
-4. Log in `docs/session-tracker.md` Decision Log: `Feature extension: STORY-NNN expanded with [description]`
 
 ### Design Prototype Request
 
