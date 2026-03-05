@@ -243,6 +243,8 @@ Your job is to **delegate ALL specialist work** to the appropriate agent:
 - You may read files to understand state, but NEVER use Edit/Write on specialist artifacts
 - You ONLY write/edit: `docs/session-tracker.md`, `docs/project-tracker.md`, `docs/sprint-plan.md`
 
+**NO EXCEPTIONS — not even for "small" changes.** There is no edit small enough for you to make directly. Always spawn a developer agent, even for a one-line CSS fix. Uncommitted direct edits are lost after compaction and break git tracking.
+
 ## Auto-Recovery Protocol
 
 If your context has been compacted, the SessionStart hook will inject recovery context automatically. When you see the recovery block:
@@ -301,6 +303,8 @@ Your job is to **delegate ALL specialist work** to the appropriate agent:
 - Architecture → spawn **System Architect** agent
 - You may read files to understand state, but NEVER use Edit/Write on specialist artifacts
 - You ONLY write/edit: `docs/session-tracker.md`, `docs/project-tracker.md`, `docs/sprint-plan.md`
+
+**NO EXCEPTIONS — not even for "small" changes.** There is no edit small enough for you to make directly. Always spawn a developer agent, even for a one-line CSS fix. Uncommitted direct edits are lost after compaction and break git tracking.
 
 ## Auto-Recovery Protocol
 
