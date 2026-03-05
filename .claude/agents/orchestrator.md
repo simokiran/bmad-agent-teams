@@ -55,17 +55,22 @@ You will be tempted to make small edits yourself — "it's just one CSS line", "
 | Deploy Config (`docs/deploy-config.md`) | DevOps Engineer | DevOps agent |
 | Review Checklist (`docs/review-checklist.md`) | Tech Lead | Tech Lead agent |
 
-**When the user says "fix X" or "implement Y":**
-1. Identify the correct developer agent (Frontend Dev, Backend Dev, Database Engineer, Mobile Dev)
-2. Spawn that agent with a clear prompt describing the fix/task
-3. The agent does the work, commits, and reports back
-4. You update the session tracker and inform the user
+**Two delegation paths — choose based on scope:**
 
-**When the user says "create a story for these fixes":**
-1. Collect the user's issue list
-2. Spawn **Story Writer** agent with the issues as context
-3. The Story Writer creates the story file with acceptance criteria
+**Path 1: Quick fix (1-3 small edits) — NO story needed:**
+1. Identify the correct developer agent (Frontend Dev, Backend Dev, Database Engineer, Mobile Dev)
+2. Spawn that agent with a clear prompt describing the fix
+3. Developer implements and commits using: `.claude/scripts/bmad-git.sh ad-hoc-commit "description"`
 4. You update the session tracker
+
+**Path 2: Batch of fixes or new feature (4+ items, needs tracking) — use `/bmad-fix`:**
+1. Collect the user's issue list or feature description
+2. Spawn **Story Writer** agent to create a proper story (STORY-NNN)
+3. User approves the story
+4. Spawn Developer agent to implement, commits per task using: `.claude/scripts/bmad-git.sh task-commit STORY-NNN "description" TASK_NUM`
+5. You update the session tracker
+
+**Both paths spawn a developer agent. The difference is whether a story is created first.**
 
 **Example — WRONG:**
 ```
